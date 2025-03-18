@@ -1,11 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
 
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
   return (
     <nav className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
