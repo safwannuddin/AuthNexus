@@ -3,7 +3,7 @@
 import React, { JSX } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react"
-import { Zap, Shield, Link2, Cpu, Globe, BrainCircuit } from "lucide-react"
+import { Fingerprint, ShieldCheck, Crosshair, GitMerge, Key, Scroll } from "lucide-react"
 
 interface Feature {
   id: number;
@@ -16,45 +16,45 @@ interface Feature {
 const features: Feature[] = [
   {
     id: 1,
-    title: "Lightning Fast",
-    description: "Process transactions at incredible speeds with our optimized payment infrastructure.",
-    icon: <Zap size={32} />,
-    color: "from-blue-600 via-sky-500 to-blue-400"
+    title: "Decentralized Identity",
+    description: "Secure, user-controlled digital identities stored on blockchain infrastructure.",
+    icon: <Fingerprint size={32} />,
+    color: "from-blue-600 via-indigo-500 to-blue-400"
   },
   {
     id: 2,
-    title: "Secure Payments",
-    description: "Bank-grade security protocols protect every transaction.",
-    icon: <Shield size={32} />,
-    color: "from-purple-600 via-fuchsia-500 to-purple-400"
+    title: "Military-Grade Security",
+    description: "Quantum-resistant cryptography protecting all verification processes.",
+    icon: <ShieldCheck size={32} />,
+    color: "from-purple-600 via-violet-500 to-purple-400"
   },
   {
     id: 3,
-    title: "Global Coverage",
-    description: "Accept payments from customers anywhere in the world.",
-    icon: <Globe size={32} />,
-    color: "from-green-600 via-emerald-500 to-green-400"
+    title: "Zero-Knowledge Proofs",
+    description: "Verify credentials without exposing sensitive personal information.",
+    icon: <Crosshair size={32} />,
+    color: "from-emerald-600 via-teal-500 to-emerald-400"
   },
   {
     id: 4,
-    title: "Seamless Integration",
-    description: "Easy API integration with comprehensive documentation and developer support.",
-    icon: <Link2 size={32} />,
-    color: "from-indigo-600 via-violet-500 to-indigo-400"
-  },
-  {
-    id: 5,
-    title: "AI Fraud Detection",
-    description: "Advanced machine learning models to detect and prevent fraudulent activities.",
-    icon: <BrainCircuit size={32} />,
+    title: "Cross-Platform Trust",
+    description: "Seamless interoperability across Web2 and Web3 applications.",
+    icon: <GitMerge size={32} />,
     color: "from-rose-600 via-pink-500 to-rose-400"
   },
   {
+    id: 5,
+    title: "Self-Sovereign Identity",
+    description: "Complete user control over personal data and sharing permissions.",
+    icon: <Key size={32} />,
+    color: "from-amber-600 via-orange-500 to-amber-400"
+  },
+  {
     id: 6,
-    title: "Multi-Currency Processing",
-    description: "Support for over 100 currencies with real-time conversion rates.",
-    icon: <Cpu size={32} />,
-    color: "from-amber-600 via-yellow-500 to-amber-400"
+    title: "Smart Contract Verification",
+    description: "Automated credential validation through blockchain protocols.",
+    icon: <Scroll size={32} />,
+    color: "from-indigo-600 via-blue-500 to-indigo-400"
   }
 ];
 
@@ -76,15 +76,14 @@ const FeaturesSection = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-4xl md:text-5xl font-bold text-center mb-20 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400 animate-gradient-shift"
+          className="text-4xl md:text-5xl font-bold text-center mb-20 bg-gradient-to-r from-indigo-600 to-emerald-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-emerald-400 animate-gradient-shift"
         >
-          Next-Gen Payment Solutions
+          Decentralized Identity Revolution
         </motion.h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
-          {/* Animated Background */}
           <motion.div 
-            className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-900/20 dark:to-purple-900/20 rounded-3xl"
+            className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-emerald-500/10 dark:from-indigo-900/20 dark:to-emerald-900/20 rounded-3xl"
             animate={{
               scale: [1, 1.05, 1],
               opacity: [0.8, 1, 0.8],
@@ -96,7 +95,6 @@ const FeaturesSection = () => {
             }}
           />
 
-          {/* Feature Cards Grid */}
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
             {features.map((feature, index) => (
               <motion.div
@@ -114,7 +112,6 @@ const FeaturesSection = () => {
                 onMouseLeave={() => setHoveredIndex(null)}
                 onClick={() => setActiveFeature(index)}
               >
-                {/* Hover Overlay */}
                 <AnimatePresence>
                   {hoveredIndex === index && (
                     <motion.div
@@ -145,13 +142,11 @@ const FeaturesSection = () => {
                   </p>
                 </div>
                 
-                {/* Gradient Border Effect */}
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
               </motion.div>
             ))}
           </div>
 
-          {/* Active Feature Showcase */}
           <div className="relative z-10">
             <AnimatePresence mode="wait">
               <motion.div
@@ -189,7 +184,6 @@ const FeaturesSection = () => {
                   </motion.p>
                 </div>
 
-                {/* Progress Indicator */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2">
                   {features.map((_, index) => (
                     <motion.div

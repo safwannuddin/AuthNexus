@@ -1,49 +1,49 @@
-"use client"
+'use client'
 import { motion } from "framer-motion"
 import { CheckCircle, Smartphone, UserCheck, Zap } from "lucide-react"
 import { useState } from "react"
 
 const guideSteps = [
   {
-    title: "Download & Install",
+    title: "Upload Document",
     icon: <Smartphone className="w-6 h-6" />,
     checks: [
-      "Select your platform",
-      "Verify app authenticity",
-      "Complete installation"
-    ],
-    time: "2 minutes",
-    content: {
-      badges: ["iOS 15+", "Android 10+", "120MB Space"],
-      tips: "Scan QR code for direct download"
-    }
-  },
-  {
-    title: "Secure Account Setup",
-    icon: <UserCheck className="w-6 h-6" />,
-    checks: [
-      "Email verification",
-      "2FA activation",
-      "Profile completion"
-    ],
-    time: "3 minutes",
-    content: {
-      badges: ["256-bit Encryption", "GDPR Compliant"],
-      tips: "Use password manager integration"
-    }
-  },
-  {
-    title: "First Transaction",
-    icon: <Zap className="w-6 h-6" />,
-    checks: [
-      "Wallet funding",
-      "Recipient verification",
-      "Transaction confirmation"
+      "Select file from device",
+      "Ensure document is clear and legible",
+      "Supported formats: PDF, PNG, JPG, DOCX"
     ],
     time: "1 minute",
     content: {
-      badges: ["0.1% Fee", "24/7 Support"],
-      tips: "Try demo mode first"
+      badges: ["Secure Upload", "Instant Scan", "Multiple Formats"],
+      tips: "Drag and drop or click to select your file"
+    }
+  },
+  {
+    title: "Verify Document",
+    icon: <UserCheck className="w-6 h-6" />,
+    checks: [
+      "AI-driven authenticity check",
+      "Blockchain cross-verification",
+      "Real-time fraud detection"
+    ],
+    time: "2 minutes",
+    content: {
+      badges: ["AI Analysis", "Blockchain Security"],
+      tips: "Sit back while our system validates your document"
+    }
+  },
+  {
+    title: "Store & Retrieve",
+    icon: <Zap className="w-6 h-6" />,
+    checks: [
+      "Immutable blockchain storage",
+      "Easy document retrieval",
+      "Tamper-proof record keeping"
+    ],
+    time: "30 seconds",
+    content: {
+      badges: ["Sui Blockchain", "24/7 Access", "Audit Trail"],
+      tips: "Access your verified documents anytime, anywhere"
     }
   }
 ]
@@ -141,26 +141,27 @@ const GuideStep = ({
   </motion.div>
 )
 
-interface GuideStep {
+interface GuideStepInterface {
   title: string;
   description: string;
   icon?: React.ReactNode;
 }
 
-const steps: GuideStep[] = [
+const steps: GuideStepInterface[] = [
   {
     title: "1. Upload",
-    description: "Securely upload your documents for verification"
+    description: "Securely upload your document using our intuitive interface."
   },
   {
     title: "2. Verify",
-    description: "AI-powered document analysis and verification"
+    description: "Experience AI-powered analysis and blockchain cross-verification."
   },
   {
     title: "3. Store",
-    description: "Blockchain-based secure storage and tracking"
+    description: "Access tamper-proof records on the Sui blockchain anytime."
   }
 ];
+
 const QuickGuide = () => {
   const [currentStep, setCurrentStep] = useState(0);
   

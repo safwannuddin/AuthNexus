@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { motion } from "framer-motion"
 import { Wifi, Battery, Signal, Send, ArrowDown } from "lucide-react"
@@ -13,7 +13,7 @@ const AppUICard = () => {
     >
       {/* Phone Frame */}
       <div className="relative bg-gray-800 rounded-[40px] p-4 shadow-2xl">
-        {/* Side Button */}
+        {/* Side Buttons */}
         <div className="absolute right-[-8px] top-24 h-16 w-2 bg-gray-800 rounded-r-lg" />
         <div className="absolute right-[-8px] top-44 h-8 w-2 bg-gray-800 rounded-r-lg" />
         
@@ -29,44 +29,45 @@ const AppUICard = () => {
             </div>
           </div>
 
-          {/* Demo App Content */}
+          {/* Dashboard Preview Content */}
           <div className="absolute inset-0 p-4 flex flex-col text-white">
-            {/* Balance Section */}
+            {/* Stats Section */}
             <div className="mt-8 text-center">
-              <p className="text-gray-400 text-sm">Total Balance</p>
-              <h2 className="text-2xl font-bold mt-1">$2,458.50</h2>
-              <p className="text-xs text-gray-400">≈ 0.1548 BTC</p>
+              <p className="text-gray-400 text-sm">Total Verified Documents</p>
+              <h2 className="text-2xl font-bold mt-1">120 Documents</h2>
+              <p className="text-xs text-gray-400">Last 24 hours</p>
             </div>
 
             {/* Action Buttons */}
             <div className="flex justify-center gap-4 mt-6">
               <button className="flex flex-col items-center gap-2 text-sm hover:bg-gray-800 p-2 rounded-xl">
-                <Send className="w-6 h-6 text-blue-400" />
-                <span>Send</span>
+                {/* Rotated Send icon to represent Upload */}
+                <Send className="w-6 h-6 text-blue-400 transform rotate-45" />
+                <span>Upload</span>
               </button>
               <button className="flex flex-col items-center gap-2 text-sm hover:bg-gray-800 p-2 rounded-xl">
                 <ArrowDown className="w-6 h-6 text-green-400" />
-                <span>Receive</span>
+                <span>Dashboard</span>
               </button>
             </div>
 
-            {/* Recent Transactions */}
+            {/* Recent Verification Activity */}
             <div className="mt-6 flex-1">
-              <h3 className="text-sm font-semibold mb-2">Recent Transactions</h3>
+              <h3 className="text-sm font-semibold mb-2">Recent Verifications</h3>
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-2 bg-gray-800 rounded-lg">
                   <div>
-                    <p className="text-sm">Sent to UPI ID</p>
-                    <p className="text-xs text-gray-400">10:45 AM</p>
+                    <p className="text-sm">Verified: University Diploma</p>
+                    <p className="text-xs text-gray-400">11:30 AM</p>
                   </div>
-                  <span className="text-red-400">-₹1,500</span>
+                  <span className="text-green-400">Success</span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-gray-800 rounded-lg">
                   <div>
-                    <p className="text-sm">Received BTC</p>
-                    <p className="text-xs text-gray-400">9:15 AM</p>
+                    <p className="text-sm">Alert: Fake Certificate</p>
+                    <p className="text-xs text-gray-400">10:15 AM</p>
                   </div>
-                  <span className="text-green-400">+0.005 BTC</span>
+                  <span className="text-red-400">Alert</span>
                 </div>
               </div>
             </div>
@@ -89,4 +90,4 @@ const AppUICard = () => {
   )
 }
 
-export default AppUICard
+export default AppUICard;

@@ -23,7 +23,8 @@ const Header = () => {
             animate={{ opacity: 1, x: 0 }}
             className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent"
           >
-            SynapPay
+            AuthNexus
+           
           </motion.div>
           
           <div className="flex items-center gap-4">
