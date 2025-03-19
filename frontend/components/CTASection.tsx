@@ -27,7 +27,7 @@ const CTASection = () => {
           transition={{ delay: 0.4 }}
           className="text-xl mb-8 text-white/90 dark:text-gray-200 max-w-2xl mx-auto"
         >
-          Join thousands of users who are already enjoying the benefits of SynapPay.
+          Join thousands of users who are already enjoying the benefits of AuthNexus.
         </motion.p>
 
         <motion.div

@@ -10,25 +10,37 @@ const FAQSection = () => {
 
   const faqData = [
     {
-      question: "What is SynapPay?",
-      answer: "SynapPay is a next-generation payment platform that combines crypto and UPI transactions, offering seamless and secure global money transfers.",
+      question: "What is AuthNexus?",
+      answer: "AuthNexus is a decentralized identity verification platform that enables secure, privacy-preserving digital identity management using blockchain technology.",
     },
     {
-      question: "How secure is SynapPay?",
-      answer: "SynapPay uses bank-grade encryption and multi-sig wallets to ensure the highest level of security for your funds and transactions.",
+      question: "How does AuthNexus protect my identity?",
+      answer: "We use zero-knowledge proofs and decentralized storage to ensure your personal data remains private and secure, with only you having full control.",
     },
     {
-      question: "Which cryptocurrencies does SynapPay support?",
-      answer: "SynapPay supports a wide range of cryptocurrencies, including Bitcoin, Ethereum, and many popular altcoins. Check our supported currencies page for a full list.",
+      question: "Which blockchain does AuthNexus use?",
+      answer: "AuthNexus is blockchain-agnostic, supporting multiple chains including Ethereum, Polygon, and Solana for identity verification and credential management.",
     },
     {
-      question: "How fast are transactions on SynapPay?",
-      answer: "Most transactions on SynapPay are processed instantly. Cross-chain swaps may take a few minutes depending on network congestion.",
+      question: "Can I use AuthNexus across different platforms?",
+      answer: "Yes, AuthNexus supports cross-platform interoperability through W3C DID standards, allowing you to use your identity across Web2 and Web3 applications.",
     },
     {
-      question: "Are there any transaction limits?",
-      answer: "Transaction limits vary based on your account level and verification status. Please refer to our limits page for more details.",
+      question: "What makes AuthNexus different from traditional identity systems?",
+      answer: "Unlike centralized systems, AuthNexus gives you complete ownership of your identity data, with no single point of failure or control.",
     },
+    {
+      question: "How do I recover my identity if I lose access?",
+      answer: "AuthNexus uses advanced recovery mechanisms including social recovery and multi-sig wallets to ensure you never lose access to your identity.",
+    },
+    {
+      question: "Is AuthNexus compliant with data protection regulations?",
+      answer: "Yes, we're fully GDPR compliant and adhere to global data protection standards while maintaining our decentralized architecture.",
+    },
+    {
+      question: "Can businesses integrate AuthNexus into their systems?",
+      answer: "Absolutely! We provide comprehensive SDKs and APIs for easy integration with existing enterprise systems and applications.",
+    }
   ]
 
   const toggleQuestion = (index: number) => {
@@ -39,7 +51,7 @@ const FAQSection = () => {
     <section className="py-20 bg-gradient-to-br from-gray-50/50 via-white to-gray-100/50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
       {/* Animated Background */}
       <motion.div 
-        className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-900/20 dark:to-purple-900/20"
+        className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-emerald-500/10 dark:from-indigo-900/20 dark:to-emerald-900/20"
         animate={{
           scale: [1, 1.05, 1],
           opacity: [0.8, 1, 0.8],
@@ -52,8 +64,8 @@ const FAQSection = () => {
       />
 
       <div className="container mx-auto px-4 relative z-10">
-        <h2 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400 animate-gradient-shift">
-          Frequently Asked Questions
+        <h2 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-indigo-600 to-emerald-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-emerald-400 animate-gradient-shift">
+          Identity Verification FAQs
         </h2>
         
         <div className="max-w-3xl mx-auto space-y-4">
@@ -72,7 +84,7 @@ const FAQSection = () => {
               <motion.button
                 className={`flex justify-between items-center w-full text-left p-6 rounded-xl shadow-lg transition-all duration-300 ${
                   activeIndex === index 
-                    ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white'
+                    ? 'bg-gradient-to-br from-indigo-600 to-emerald-600 text-white'
                     : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                 }`}
                 onClick={() => toggleQuestion(index)}
@@ -137,6 +149,21 @@ const FAQSection = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Additional CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-16 text-center"
+        >
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            Still have questions? Contact our support team
+          </p>
+          <button className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-emerald-600 text-white rounded-lg hover:scale-105 transition-transform">
+            Contact Support
+          </button>
+        </motion.div>
       </div>
     </section>
   )

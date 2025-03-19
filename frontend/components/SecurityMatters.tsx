@@ -1,43 +1,43 @@
 "use client"
 import { motion } from "framer-motion"
-import { ShieldCheck, LockKeyhole, Fingerprint, ScanEye, BadgeCheck, CircuitBoard } from "lucide-react"
+import { Blocks, Key, GitMerge, Fingerprint, ScrollText, Vote } from "lucide-react"
 
 const securityFeatures = [
   {
-    title: "Military-Grade Encryption",
-    icon: <LockKeyhole className="w-8 h-8" />,
-    description: "Quantum-resistant algorithms & AES-256 protection for all transactions",
-    badges: ["NIST Certified", "FIPS 140-2"]
+    title: "Zero-Knowledge Proofs",
+    icon: <Key className="w-8 h-8" />,
+    description: "Privacy-preserving verification without exposing sensitive data",
+    badges: ["ZK-SNARKs", "Bulletproofs", "Plonk"]
   },
   {
-    title: "Regulatory Compliance",
-    icon: <BadgeCheck className="w-8 h-8" />,
-    description: "Full adherence to RBI, NPCI, FATF Travel Rule & global standards",
-    badges: ["ISO 27001", "PCI-DSS", "SOC 2"]
+    title: "Self-Sovereign Identity",
+    icon: <Blocks className="w-8 h-8" />,
+    description: "Complete user control over digital identity and credentials",
+    badges: ["W3C DID", "ERC-725", "Soulbound Tokens"]
   },
   {
-    title: "Biometric Security",
+    title: "Blockchain Biometrics",
     icon: <Fingerprint className="w-8 h-8" />,
-    description: "Device-native biometric authentication for all transactions",
-    badges: ["FIDO2 Certified", "WebAuthn"]
+    description: "Decentralized biometric authentication with crypto-binding",
+    badges: ["FIDO2", "Web3 Auth", "IPFS Storage"]
   },
   {
-    title: "Smart Audits",
-    icon: <ScanEye className="w-8 h-8" />,
-    description: "Real-time transaction monitoring with AI/ML anomaly detection",
-    badges: ["Chainalysis", "CertiK Audited"]
+    title: "Smart Contract Audits",
+    icon: <ScrollText className="w-8 h-8" />,
+    description: "Automated credential verification through blockchain logic",
+    badges: ["CertiK Audited", "Formal Verification", "ECDSA"]
   },
   {
-    title: "Decentralized Protection",
-    icon: <CircuitBoard className="w-8 h-8" />,
-    description: "MPC wallets & distributed key management systems",
-    badges: ["Multi-Party Compute", "HSM Backed"]
+    title: "Distributed Key Management",
+    icon: <GitMerge className="w-8 h-8" />,
+    description: "Threshold cryptography for secure key distribution",
+    badges: ["Shamir's Secret", "MPC", "HSM Integration"]
   },
   {
-    title: "Cyber Insurance",
-    icon: <ShieldCheck className="w-8 h-8" />,
-    description: "$100M coverage for digital assets through Lloyd's of London",
-    badges: ["1% Fee Allocation", "24/7 Support"]
+    title: "DAO Governance",
+    icon: <Vote className="w-8 h-8" />,
+    description: "Community-driven protocol updates and standards",
+    badges: ["On-Chain Voting", "Token Gated", "Snapshot"]
   }
 ]
 
@@ -45,10 +45,10 @@ const SecurityCard = ({ feature }: { feature: typeof securityFeatures[number] })
   <motion.div
     whileHover={{ scale: 1.02 }}
     whileTap={{ scale: 0.98 }}
-    className="group p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 hover:border-blue-100 dark:hover:border-blue-900 transition-all"
+    className="group p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 hover:border-indigo-100 dark:hover:border-emerald-900 transition-all"
   >
     <div className="flex items-start gap-4 mb-4">
-      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+      <div className="p-3 bg-gradient-to-br from-indigo-100 to-emerald-100 dark:from-indigo-900/20 dark:to-emerald-900/20 rounded-lg">
         {feature.icon}
       </div>
       <div>
@@ -73,18 +73,18 @@ const SecurityCard = ({ feature }: { feature: typeof securityFeatures[number] })
 
 const SecurityMatters = () => {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-950">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50/50 dark:bg-gray-950">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-            Enterprise-Grade Security
+          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-emerald-600 dark:from-indigo-400 dark:to-emerald-400">
+            Trust Through Decentralization
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Protecting your assets with military-grade encryption and compliance-first architecture
+            Revolutionizing digital trust with blockchain-native security and privacy-preserving protocols
           </p>
         </motion.div>
 
@@ -102,4 +102,4 @@ const SecurityMatters = () => {
   )
 }
 
-export default SecurityMatters;
+export default SecurityMatters
