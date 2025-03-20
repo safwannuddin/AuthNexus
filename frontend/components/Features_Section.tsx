@@ -1,212 +1,262 @@
 "use client"
 
-import React, { JSX } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useState, useEffect } from "react"
-import { Fingerprint, ShieldCheck, Crosshair, GitMerge, Key, Scroll } from "lucide-react"
+import React from "react"
+import { motion } from "framer-motion"
+import { useState } from "react"
+import { Fingerprint, ShieldCheck, Crosshair, Lock, Cpu, Database, GitMerge,  } from "lucide-react"
 
-interface Feature {
-  id: number;
-  title: string;
-  description: string;
-  icon: JSX.Element;
-  color: string;
-}
-
-const features: Feature[] = [
+const features = [
   {
     id: 1,
     title: "Decentralized Identity",
     description: "Secure, user-controlled digital identities stored on blockchain infrastructure.",
     icon: <Fingerprint size={32} />,
-    color: "from-blue-600 via-indigo-500 to-blue-400"
+    gradient: "from-[#00ff41] via-[#00f0ff] to-[#ff00ff]",
+    stats: {
+      security: "99.9%",
+      speed: "0.5s",
+      trust: "100%"
+    }
   },
   {
     id: 2,
     title: "Military-Grade Security",
     description: "Quantum-resistant cryptography protecting all verification processes.",
     icon: <ShieldCheck size={32} />,
-    color: "from-purple-600 via-violet-500 to-purple-400"
+    gradient: "from-[#00f0ff] via-[#ff00ff] to-[#00ff41]",
+    stats: {
+      encryption: "256-bit",
+      protection: "100%",
+      uptime: "24/7"
+    }
   },
   {
     id: 3,
     title: "Zero-Knowledge Proofs",
     description: "Verify credentials without exposing sensitive personal information.",
     icon: <Crosshair size={32} />,
-    color: "from-emerald-600 via-teal-500 to-emerald-400"
+    gradient: "from-[#ff00ff] via-[#00ff41] to-[#00f0ff]",
+    stats: {
+      privacy: "100%",
+      verification: "2.5s",
+      accuracy: "99.9%"
+    }
   },
   {
     id: 4,
-    title: "Cross-Platform Trust",
-    description: "Seamless interoperability across Web2 and Web3 applications.",
-    icon: <GitMerge size={32} />,
-    color: "from-rose-600 via-pink-500 to-rose-400"
+    title: "AI-Powered Verification",
+    description: "Advanced machine learning algorithms for real-time document authentication.",
+    icon: <Cpu size={32} />,
+    gradient: "from-[#00ff41] to-[#00f0ff]",
+    stats: {
+      accuracy: "99.99%",
+      processing: "0.3s",
+      detection: "100%"
+    }
   },
   {
     id: 5,
-    title: "Self-Sovereign Identity",
-    description: "Complete user control over personal data and sharing permissions.",
-    icon: <Key size={32} />,
-    color: "from-amber-600 via-orange-500 to-amber-400"
+    title: "Distributed Storage",
+    description: "Secure document storage across decentralized nodes with instant retrieval.",
+    icon: <Database size={32} />,
+    gradient: "from-[#00f0ff] to-[#ff00ff]",
+    stats: {
+      redundancy: "100%",
+      access: "0.1s",
+      availability: "99.99%"
+    }
   },
   {
     id: 6,
-    title: "Smart Contract Verification",
-    description: "Automated credential validation through blockchain protocols.",
-    icon: <Scroll size={32} />,
-    color: "from-indigo-600 via-blue-500 to-indigo-400"
+    title: "Smart Contract Security",
+    description: "Automated verification through audited blockchain smart contracts.",
+    icon: <Lock size={32} />,
+    gradient: "from-[#00ff41] via-[#ff00ff] to-[#00f0ff]",
+    stats: {
+      audited: "100%",
+      automated: "24/7",
+      secure: "100%"
+    }
+  },
+  {
+    id: 7,
+    title: "Cross-Chain Integration",
+    description: "Seamless verification across multiple blockchain networks.",
+    icon: <GitMerge size={32} />,
+    gradient: "from-[#00f0ff] via-[#00ff41] to-[#ff00ff]",
+    stats: {
+      chains: "20+",
+      bridges: "100%",
+      sync: "real-time"
+    }
   }
-];
+]
 
 const FeaturesSection = () => {
-  const [activeFeature, setActiveFeature] = useState(0)
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveFeature(prev => (prev + 1) % features.length)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
+  const [hoveredFeature, setHoveredFeature] = useState<number | null>(null)
 
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50/50 via-white to-gray-100/50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto">
-        <motion.h2
+    <section className="relative py-24 overflow-hidden">
+      {/* Enhanced Animated Background */}
+      <motion.div 
+        className="absolute inset-0 opacity-10"
+        style={{
+          background: `
+            radial-gradient(circle at 20% 30%, rgba(0, 255, 65, 0.15) 0%, transparent 30%),
+            radial-gradient(circle at 80% 70%, rgba(0, 240, 255, 0.15) 0%, transparent 30%),
+            radial-gradient(circle at center, #00ff41 1px, transparent 1px)
+          `,
+          backgroundSize: '24px 24px, 24px 24px, 24px 24px'
+        }}
+        animate={{
+          backgroundPosition: ['0px 0px', '24px 24px']
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+      />
+
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Enhanced Section Title */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-4xl md:text-5xl font-bold text-center mb-20 bg-gradient-to-r from-indigo-600 to-emerald-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-emerald-400 animate-gradient-shift"
+          className="text-center mb-16"
         >
-          Decentralized Identity Revolution
-        </motion.h2>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
-          <motion.div 
-            className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-emerald-500/10 dark:from-indigo-900/20 dark:to-emerald-900/20 rounded-3xl"
-            animate={{
-              scale: [1, 1.05, 1],
-              opacity: [0.8, 1, 0.8],
-              rotate: [0, 0.5, -0.5, 0]
-            }}
-            transition={{
-              duration: 12,
-              repeat: Infinity
-            }}
-          />
-
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "0px 0px -100px 0px" }}
-                transition={{ delay: index * 0.1 }}
-                className={`relative rounded-2xl p-6 cursor-pointer transition-all duration-300 ${
-                  activeFeature === index 
-                    ? 'bg-gradient-to-br shadow-2xl scale-[1.02] border-2 border-white/30' 
-                    : 'bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl border-2 border-transparent'
-                } ${feature.color}`}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-                onClick={() => setActiveFeature(index)}
-              >
-                <AnimatePresence>
-                  {hoveredIndex === index && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="absolute inset-0 bg-white/10 dark:bg-black/20 rounded-2xl backdrop-blur-sm"
-                    />
-                  )}
-                </AnimatePresence>
-
-                <div className="relative z-10">
-                  <motion.div
-                    animate={activeFeature === index ? { 
-                      rotate: [0, 10, -10, 0],
-                      scale: [1, 1.1, 1]
-                    } : {}}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="mb-4 text-white drop-shadow-lg"
-                  >
-                    {feature.icon}
-                  </motion.div>
-                  <h3 className="text-xl font-bold mb-3 text-white drop-shadow-md">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-200/90 dark:text-gray-300/90 text-sm leading-relaxed font-medium">
-                    {feature.description}
-                  </p>
-                </div>
-                
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
-              </motion.div>
-            ))}
+          <div className="relative inline-block">
+            <motion.h2 
+              className="text-5xl font-bold mb-6 relative z-10"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <span className="bg-gradient-to-r from-[#00ff41] via-[#00f0ff] to-[#ff00ff] bg-clip-text text-transparent
+                relative before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#00ff41] before:to-[#00f0ff] 
+                before:blur-xl before:opacity-30 before:-z-10">
+                Revolutionary Features
+              </span>
+            </motion.h2>
+            <motion.div
+              className="absolute -bottom-2 left-0 right-0 h-[2px]"
+              style={{
+                background: 'linear-gradient(90deg, #00ff41, #00f0ff, #ff00ff, #00ff41)',
+                backgroundSize: '200% 100%'
+              }}
+              animate={{
+                backgroundPosition: ['0% 50%', '200% 50%']
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
           </div>
+          <motion.p 
+            className="text-xl text-gray-400 mt-6"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            Next-generation authentication powered by blockchain
+          </motion.p>
+        </motion.div>
 
-          <div className="relative z-10">
-            <AnimatePresence mode="wait">
+        {/* Enhanced Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              onHoverStart={() => setHoveredFeature(index)}
+              onHoverEnd={() => setHoveredFeature(null)}
+              className="relative feature-card-hover"
+            >
+              {/* Enhanced Card Background */}
+              <div className="absolute inset-0 rounded-xl bg-black/30 backdrop-blur-xl" />
+              
+              {/* Enhanced Glowing Border */}
               <motion.div
-                key={activeFeature}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.4 }}
-                className="sticky top-24 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-700 rounded-2xl p-8 shadow-2xl h-[420px] border-2 border-white/10 backdrop-blur-lg"
-                style={{
-                  background: `linear-gradient(45deg, ${features[activeFeature].color.replace(/from|via|to/g, '').split(' ')[0]}, ${features[activeFeature].color.split(' ')[2]})`
+                className={`absolute inset-0 rounded-xl bg-gradient-to-r ${feature.gradient}`}
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: hoveredFeature === index ? 0.15 : 0.05,
+                  scale: hoveredFeature === index ? 1.02 : 1
                 }}
-              >
-                <div className="text-white relative">
-                  <div className="mb-6 animate-float">
-                    <div className="relative inline-block">
-                      {features[activeFeature].icon}
-                      <div className="absolute inset-0 bg-current blur-2xl opacity-20 rounded-full" />
-                    </div>
-                  </div>
-                  <motion.h3
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-2xl font-bold mb-4 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent"
-                  >
-                    {features[activeFeature].title}
-                  </motion.h3>
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-gray-100/90 leading-relaxed font-medium"
-                  >
-                    {features[activeFeature].description}
-                  </motion.p>
-                </div>
+                transition={{ duration: 0.3 }}
+              />
 
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2">
-                  {features.map((_, index) => (
+              {/* Content Container */}
+              <div className="relative p-6 rounded-xl border border-white/10">
+                {/* Enhanced Icon */}
+                <motion.div
+                  className={`
+                    relative w-16 h-16 mb-6 rounded-lg
+                    bg-gradient-to-r ${feature.gradient}
+                    p-0.5 animate-neon-pulse
+                  `}
+                >
+                  <div className="relative w-full h-full bg-black/90 rounded-[7px] flex items-center justify-center">
                     <motion.div
-                      key={index}
-                      className={`h-2 w-2 rounded-full ${
-                        activeFeature === index 
-                          ? 'bg-white scale-150' 
-                          : 'bg-white/30 scale-100'
-                      }`}
-                      initial={{ scale: 0.5 }}
-                      animate={{ 
-                        scale: activeFeature === index ? 1.5 : 1,
-                        backgroundColor: activeFeature === index 
-                          ? features[index].color.split(' ')[2] 
-                          : 'rgba(255,255,255,0.3)'
+                      animate={hoveredFeature === index ? {
+                        scale: [1, 1.1, 1],
+                        y: [0, -2, 0]
+                      } : {}}
+                      transition={{
+                        duration: 0.4,
+                        ease: "easeInOut"
                       }}
-                      transition={{ duration: 0.3 }}
-                    />
+                      className="text-[#00ff41]"
+                    >
+                      {feature.icon}
+                    </motion.div>
+                  </div>
+                </motion.div>
+
+                {/* Enhanced Text Content */}
+                <motion.h3 
+                  className={`text-xl font-bold mb-3 bg-gradient-to-r ${feature.gradient} bg-clip-text text-transparent`}
+                  animate={hoveredFeature === index ? { scale: 1.05 } : { scale: 1 }}
+                >
+                  {feature.title}
+                </motion.h3>
+                <p className="text-gray-400 mb-6 transition-colors duration-300 group-hover:text-gray-300">
+                  {feature.description}
+                </p>
+
+                {/* Enhanced Stats */}
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
+                  {Object.entries(feature.stats).map(([key, value], i) => (
+                    <motion.div
+                      key={key}
+                      className="text-center"
+                      animate={hoveredFeature === index ? {
+                        y: [0, -2, 0],
+                        transition: { delay: i * 0.1 }
+                      } : {}}
+                    >
+                      <motion.div 
+                        className="text-[#00ff41] font-mono font-bold text-lg mb-1"
+                        animate={hoveredFeature === index ? {
+                          scale: [1, 1.1, 1],
+                          transition: { delay: i * 0.1 }
+                        } : {}}
+                      >
+                        {value}
+                      </motion.div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wider">
+                        {key}
+                      </div>
+                    </motion.div>
                   ))}
                 </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
