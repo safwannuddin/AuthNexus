@@ -9,19 +9,62 @@
   }
 }
 
+/* Background Animations */
+@keyframes gradient-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
 @keyframes grid-scroll {
-  0% {
-    transform: translateY(0);
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
   }
-  100% {
-    transform: translateY(-100%);
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
   }
 }
 
+/* Text Effects */
+@keyframes text-glitch {
+  0% {
+    text-shadow: 0.05em 0 0 hsl(var(--neon-green)), 
+                -0.05em -0.025em 0 hsl(var(--electric-blue));
+  }
+  50% {
+    text-shadow: -0.05em -0.025em 0 hsl(var(--neon-green)),
+                0.025em 0.025em 0 hsl(var(--electric-blue));
+  }
+  100% {
+    text-shadow: 0.025em 0 0 hsl(var(--neon-green)),
+                -0.025em -0.025em 0 hsl(var(--electric-blue));
+  }
+}
+
+/* Animation Classes */
 .animate-gradient-x {
   animation: gradient-x 15s ease infinite;
 }
 
+.animate-gradient-flow {
+  animation: gradient-flow 15s ease infinite;
+  background-size: 200% 200%;
+}
+
 .animate-grid-scroll {
   animation: grid-scroll 20s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-text-glitch {
+  animation: text-glitch 3s infinite;
 }

@@ -4,20 +4,20 @@
 @import '../styles/animations.css';
 
 :root {
+  /* Core Theme Colors */
+  --neon-green: 140 100% 50%;
+  --electric-blue: 195 100% 50%;
+  --cyber-purple: 280 100% 50%;
+  
+  /* System Colors */
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;
   --card: 240 10% 3.9%;
   --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  --primary: var(--neon-green);
+  --secondary: var(--electric-blue);
+  --accent: var(--cyber-purple);
+  --muted: 240 20% 20%;
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 48%;
@@ -34,10 +34,21 @@
   }
 }
 
-body {
-  @apply bg-background text-foreground;
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+@layer base {
+  body {
+    @apply bg-background text-foreground relative overflow-x-hidden;
+    color: rgb(var(--foreground-rgb));
+    background-image: 
+      radial-gradient(circle at center, hsl(var(--neon-green) / 0.03), transparent 70%),
+      linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.9)),
+      linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+  }
+  
+  /* Make sure header is always on top */
+  header {
+    @apply backdrop-blur-sm;
+    isolation: isolate;
+  }
 }
 
 /* Add gradient-shift animation here */
@@ -56,6 +67,23 @@ body {
   .animate-gradient-shift {
     background-size: 200% 200%;
     animation: gradient-shift 8s ease infinite;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 20px -10px rgba(0, 255, 65, 0.5);
+  }
+  to {
+    box-shadow: 0 0 20px 10px rgba(0, 255, 65, 0.2);
   }
 }
 
@@ -118,7 +146,41 @@ body {
 
 @layer components {
   .glass-card {
-    @apply bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg;
+    @apply bg-black/30 backdrop-blur-md border border-white/10 rounded-lg 
+           hover:border-[hsl(var(--neon-green)/0.5)] transition-all duration-300;
+    box-shadow: 0 0 20px hsl(var(--neon-green) / 0.1);
+  }
+
+  .neon-text {
+    @apply font-bold;
+    text-shadow: 0 0 10px hsl(var(--neon-green) / 0.5);
+  }
+
+  .cyber-border {
+    @apply relative p-[1px] rounded-lg overflow-hidden;
+    background: linear-gradient(
+      45deg, 
+      hsl(var(--neon-green) / 0.5),
+      hsl(var(--electric-blue) / 0.5),
+      hsl(var(--cyber-purple) / 0.5)
+    );
+  }
+
+  .cyber-button {
+    @apply px-6 py-2 rounded-lg bg-black/50 text-white 
+           border border-[hsl(var(--neon-green)/0.3)]
+           hover:border-[hsl(var(--neon-green)/1)]
+           transition-all duration-300
+           relative overflow-hidden;
+  }
+
+  .cyber-button::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 hover:opacity-20 transition-opacity;
+    background: linear-gradient(45deg,
+      hsl(var(--neon-green)),
+      hsl(var(--electric-blue))
+    );
   }
 
   .gradient-background {

@@ -2,77 +2,103 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useTheme } from "next-themes"
-import { Moon, Sun, ArrowRight } from "lucide-react"
 import { motion } from "framer-motion"
+import { Rocket, Shield, Book } from "lucide-react"
 
 const Header = () => {
-  const [mounted, setMounted] = useState(false)
-  const { theme, setTheme } = useTheme()
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [activeSection, setActiveSection] = useState("")
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+      
+      // Update active section based on scroll position
+      const sections = ["home", "about", "features", "docs"]
+      const current = sections.find(section => {
+        const element = document.getElementById(section)
+        if (element) {
+          const bounds = element.getBoundingClientRect()
+          return bounds.top <= 100 && bounds.bottom >= 100
+        }
+        return false
+      })
+      if (current) setActiveSection(current)
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
-  if (!mounted) return null
+  const navItems = [
+    { href: "#about", label: "About", icon: Shield },
+    { href: "#features", label: "Features", icon: Rocket },
+    { href: "#docs", label: "Docs", icon: Book },
+  ]
 
   return (
-    <header className="fixed top-[3%] left-0 right-0 z-50 pt-safe">
-      <div className="mx-auto max-w-[80%] rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-md shadow-lg">
-        <nav className="px-6 py-3 flex justify-between items-center">
+    <motion.header
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      className="fixed top-0 left-0 right-0 z-50 h-12" // Reduced from h-16 to h-12
+    >
+      <div className={`mx-auto max-w-[85%] h-full transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-black/50 backdrop-blur-lg border border-[#00ff41]/10 rounded-b-lg' // Changed from 2xl to lg
+          : 'bg-transparent'
+      }`}>
+        <nav className="h-full px-4 flex justify-between items-center"> {/* Reduced padding */}
+          {/* Logo */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent"
+            className="relative w-[140px]" // Reduced width
           >
-            AuthNexus
-           
+            <span className="text-lg font-bold bg-gradient-to-r from-[#00ff41] via-[#00f0ff] to-[#ff00ff] bg-clip-text text-transparent">
+              AuthNexus
+            </span>
+            <motion.div
+              className="absolute -bottom-0.5 left-0 h-[1.5px] bg-gradient-to-r from-[#00ff41] to-[#00f0ff]"
+              initial={{ width: "0%" }}
+              whileInView={{ width: "100%" }}
+              transition={{ duration: 0.5 }}
+            />
           </motion.div>
-          
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-5">
-              <motion.div whileHover={{ scale: 1.05 }}>
-                <Link
-                  href="#about"
-                  className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+
+          {/* Centered Navigation */}
+          <div className="flex-1 flex justify-center">
+            <div className="flex items-center gap-3 bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full border border-[#00ff41]/10">
+              {navItems.map((item) => (
+                <motion.div
+                  key={item.href}
+                  whileHover={{ scale: 1.05 }}
+                  className="relative"
                 >
-                  About Us
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }}>
-                <Link
-                  href="#features"
-                  className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Features
-                </Link>
-              </motion.div>
+                  <Link
+                    href={item.href}
+                    className="text-xs font-medium text-gray-300 hover:text-[#00ff41] transition-colors px-2 py-1 flex items-center gap-1.5"
+                    onClick={() => setActiveSection(item.href.substring(1))}
+                  >
+                    <item.icon className="w-3 h-3" />
+                    {item.label}
+                  </Link>
+                  {activeSection === item.href.substring(1) && (
+                    <motion.div
+                      layoutId="activeSection"
+                      className="absolute inset-0 bg-[#00ff41]/10 rounded-md -z-10"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                </motion.div>
+              ))}
             </div>
-
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Link
-                href={process.env.NEXT_PUBLIC_FLUTTER_WEB_URL || "http://localhost:54321"}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all flex items-center text-sm gap-2"
-              >
-                Get Started
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </motion.div>
-
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 transition-colors"
-            >
-              {theme === "dark" ? (
-                <Sun size={18} className="text-yellow-400" />
-              ) : (
-                <Moon size={18} className="text-blue-600" />
-              )}
-            </motion.button>
           </div>
+
+          {/* Right space for symmetry */}
+          <div className="w-[140px]" /> {/* Reduced width to match logo */}
         </nav>
       </div>
-    </header>
+    </motion.header>
   )
 }
 

@@ -28,7 +28,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${manrope.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <div className="min-h-screen pt-16"> {/* Add padding equal to header height */}
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>
