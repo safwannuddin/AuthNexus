@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
@@ -144,7 +144,7 @@ const HeroSection = () => {
               <motion.button
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push("/onboarding")}  // Make sure this matches your route
                 className="relative px-8 py-4 text-lg font-bold text-black group"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
