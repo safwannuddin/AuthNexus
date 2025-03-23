@@ -4,30 +4,32 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { Shield, Fingerprint, Upload, Camera, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-
-type VerificationMethod = 'document' | 'biometric' | 'selfie'
+import { createVerificationRecord } from '@/lib/supabaseHelper'
+import type { VerificationMethod } from '@/types'
 
 export default function VerifyPage() {
   const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [selectedMethod, setSelectedMethod] = useState<VerificationMethod | null>(null)
 
   const verificationMethods = [
     {
-      id: 'document',
+      id: 'DOCUMENT' as VerificationMethod,
       title: 'Document Verification',
       description: 'Upload your government-issued ID or passport',
       icon: Upload,
       color: '#00ff41'
     },
     {
-      id: 'biometric',
+      id: 'BIOMETRIC' as VerificationMethod,
       title: 'Biometric Verification',
       description: 'Use fingerprint or face recognition',
       icon: Fingerprint,
       color: '#00f0ff'
     },
     {
-      id: 'selfie',
+      id: 'SELFIE' as VerificationMethod,
       title: 'Selfie Verification',
       description: 'Take a photo for facial recognition',
       icon: Camera,
@@ -35,9 +37,23 @@ export default function VerifyPage() {
     }
   ]
 
-  const handleContinue = () => {
-    if (selectedMethod) {
-      router.push('/onboarding/security')
+  const handleVerification = async () => {
+    if (!selectedMethod) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const userId = localStorage.getItem('userId')
+      if (!userId) throw new Error('User ID not found')
+
+      await createVerificationRecord(userId, selectedMethod)
+
+      router.push(`/onboarding/verify/${selectedMethod.toLowerCase()}`)
+    } catch (err: Error | unknown) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -52,7 +68,7 @@ export default function VerifyPage() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-2xl mx-auto"
         >
-          {/* Header with Icon */}
+          {/* Header */}
           <div className="text-center mb-12">
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
@@ -82,7 +98,7 @@ export default function VerifyPage() {
             {verificationMethods.map((method, index) => (
               <motion.button
                 key={method.id}
-                onClick={() => setSelectedMethod(method.id as VerificationMethod)}
+                onClick={() => setSelectedMethod(method.id)}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -110,6 +126,17 @@ export default function VerifyPage() {
             ))}
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-red-500 text-sm text-center mb-4"
+            >
+              {error}
+            </motion.div>
+          )}
+
           {/* Navigation */}
           <div className="flex items-center justify-between">
             <button
@@ -121,17 +148,17 @@ export default function VerifyPage() {
             </button>
 
             <button
-              onClick={handleContinue}
-              disabled={!selectedMethod}
+              onClick={handleVerification}
+              disabled={!selectedMethod || loading}
               className={`
                 flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors
-                ${selectedMethod 
+                ${selectedMethod && !loading
                   ? 'bg-[#00ff41] text-black hover:bg-[#00ff41]/90' 
                   : 'bg-gray-600 text-gray-300 cursor-not-allowed'
                 }
               `}
             >
-              Continue
+              {loading ? 'Processing...' : 'Continue'}
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
