@@ -1,13 +1,13 @@
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import HeroSection from "../../components/HeroSection";
-import Features_Section from "../../components/Features_Section";
-import FAQSection from "../../components/FAQSection";
-import ContactSection from "../../components/ContactSection";
-import CTASection from "../../components/CTASection";
-import AboutSection from "../../components/AboutSection";
-import QuickGuide from "../../components/QuickGuide";
-import SecurityMatters from "../../components/SecurityMatters";
+import Header from "../../components/landingpage/Header";
+import Footer from "../../components/landingpage/Footer";
+import HeroSection from "../../components/landingpage/HeroSection";
+import Features_Section from "../../components/landingpage/Features_Section";
+import FAQSection from "../../components/landingpage/FAQSection";
+import ContactSection from "../../components/landingpage/ContactSection";
+import CTASection from "../../components/landingpage/CTASection";
+import AboutSection from "../../components/landingpage/AboutSection";
+import QuickGuide from "../../components/landingpage/QuickGuide";
+import SecurityMatters from "../../components/landingpage/SecurityMatters";
 
 export default function Home() {
   return (

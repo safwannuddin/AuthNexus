@@ -2,9 +2,9 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import { ArrowRight, Lock, Zap, CheckCircle } from "lucide-react"
 import AppUICard from "./AppUICard"
+import { useRouter } from 'next/navigation'
 
 const heroContent = [
   {
@@ -34,16 +34,19 @@ const heroContent = [
 ]
 
 const HeroSection = () => {
-  const [index, setIndex] = useState(0)
   const router = useRouter()
+  const [index, setIndex] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
-
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex(prev => (prev + 1) % heroContent.length)
     }, 5000)
     return () => clearInterval(interval)
   }, [])
+
+  const handleGetStarted = () => {
+    router.push('/dashboard')
+  }
 
   return (
     <section className="min-h-[85vh] flex items-center justify-center relative z-10">
@@ -144,7 +147,7 @@ const HeroSection = () => {
               <motion.button
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                onClick={() => router.push("/onboarding")}  // Make sure this matches your route
+                onClick={handleGetStarted}  // Changed this line
                 className="relative px-8 py-4 text-lg font-bold text-black group"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

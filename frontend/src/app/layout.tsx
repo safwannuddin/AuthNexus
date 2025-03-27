@@ -15,8 +15,9 @@ const manrope = Manrope({
 })
 
 export const metadata = {
-  title: "SynapPay - The Future of Payments",
-  description: "Seamless crypto and UPI transactions in one powerful platform",
+  title: "AuthNexus - Decentralized AI Verification",
+description: "AI-powered fraud detection with blockchain-secured document verification",
+
 }
 
 export default function RootLayout({
