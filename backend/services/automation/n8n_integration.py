@@ -1,103 +1,96 @@
-import os
-import json
 import requests
-from typing import Dict, Any, List, Optional
+import json
 from fastapi import HTTPException
+from typing import Dict, Any
 
 from core.config import get_settings
 
 settings = get_settings()
 
-class N8NAutomationService:
-    """Service for integrating with n8n for workflow automation"""
+class N8nService:
+    """Service to interact with n8n for workflow automation."""
     
     def __init__(self):
+        """Initialize the n8n service."""
         self.webhook_url = settings.N8N_WEBHOOK_URL
         self.api_key = settings.N8N_API_KEY
-        
+    
     async def trigger_workflow(self, 
                              event_type: str, 
-                             payload: Dict[str, Any]) -> Dict:
-        """Trigger n8n workflow via webhook"""
+                             data: Dict[str, Any]) -> bool:
+        """
+        Trigger an n8n workflow via webhook.
+        
+        Args:
+            event_type: Type of event (document_verified, document_rejected, etc.)
+            data: Data to send with the webhook
+        
+        Returns:
+            bool: Success status
+        """
         try:
-            # Add event type to payload
-            complete_payload = {
+            # Prepare payload
+            payload = {
                 "event_type": event_type,
-                "data": payload
+                "data": data
             }
             
-            # Send to n8n webhook
+            # Add authentication
+            headers = {
+                "Content-Type": "application/json",
+                "X-N8N-API-KEY": self.api_key
+            }
+            
+            # Send request to n8n webhook
             response = requests.post(
                 self.webhook_url,
-                json=complete_payload,
-                headers={
-                    "Content-Type": "application/json",
-                    "X-API-KEY": self.api_key
-                },
-                timeout=5  # 5 second timeout
+                json=payload,
+                headers=headers
             )
             
-            # Check response
-            if response.status_code >= 400:
-                print(f"n8n webhook error: {response.text}")
-                return {
-                    "status": "ERROR",
-                    "message": f"Workflow trigger failed with status {response.status_code}",
-                    "event_type": event_type
-                }
+            # Check if request was successful
+            if response.status_code == 200:
+                return True
+            else:
+                print(f"n8n webhook failed: {response.status_code} - {response.text}")
+                return False
                 
-            # Return success with any response data
-            try:
-                response_data = response.json()
-            except:
-                response_data = {"raw_response": response.text}
-                
-            return {
-                "status": "SUCCESS",
-                "event_type": event_type,
-                "workflow_data": response_data
-            }
-            
         except Exception as e:
-            print(f"n8n automation error: {str(e)}")
-            return {
-                "status": "ERROR",
-                "message": f"Workflow trigger failed: {str(e)}",
-                "event_type": event_type
-            }
+            print(f"Error triggering n8n workflow: {e}")
+            return False
     
-    async def handle_document_verification(self, verification_result: Dict) -> Dict:
-        """Handle document verification workflow"""
-        # The workflow might include:
-        # 1. Notifying users
-        # 2. Creating tickets for manual review if needed
-        # 3. Updating user verification status
-        # 4. Triggering additional processes
-        
+    async def notify_document_verification(self, 
+                                         document_id: str, 
+                                         verification_id: str, 
+                                         status: str,
+                                         metadata: Dict[str, Any]) -> bool:
+        """Send a notification about document verification status."""
         return await self.trigger_workflow(
             event_type="document_verification",
-            payload=verification_result
+            data={
+                "document_id": document_id,
+                "verification_id": verification_id,
+                "status": status,
+                "timestamp": metadata.get("verification_timestamp"),
+                "confidence_score": metadata.get("ocr", {}).get("confidence"),
+                "blockchain_tx_hash": metadata.get("blockchain_tx_hash")
+            }
         )
     
-    async def handle_user_signup(self, user_data: Dict) -> Dict:
-        """Handle user signup workflow"""
+    async def notify_security_alert(self, 
+                                  alert_type: str, 
+                                  severity: str,
+                                  details: Dict[str, Any]) -> bool:
+        """Send a security alert notification."""
         return await self.trigger_workflow(
-            event_type="user_signup",
-            payload=user_data
-        )
-    
-    async def schedule_verification_reminder(self, 
-                                          user_id: str, 
-                                          due_date_iso: str) -> Dict:
-        """Schedule a verification reminder"""
-        return await self.trigger_workflow(
-            event_type="schedule_reminder",
-            payload={
-                "user_id": user_id,
-                "reminder_type": "verification",
-                "due_date": due_date_iso  # ISO format date
+            event_type="security_alert",
+            data={
+                "alert_type": alert_type,
+                "severity": severity,
+                "details": details,
+                "timestamp": details.get("timestamp")
             }
         )
 
-# Export an instance for easy import
-automation_service = N8NAutomationService()
+# Create singleton instance
+automation_service = N8nService()

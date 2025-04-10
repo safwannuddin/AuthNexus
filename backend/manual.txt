@@ -1,0 +1,1651 @@
+# AuthNexus Project: Detailed Implementation Guide
+
+## Introduction
+
+AuthNexus is an advanced document verification platform that combines artificial intelligence with blockchain technology to create a secure, tamper-proof system for verifying important documents. This manual provides comprehensive, step-by-step instructions for building, testing, and deploying the entire AuthNexus system.
+
+Unlike traditional document management systems, AuthNexus uses blockchain anchoring to create immutable verification records, ensuring that once a document is verified, its status cannot be altered without detection. The AI-powered verification engine automatically extracts and validates information from various document types, making the verification process both more accurate and more efficient.
+
+## Project Roadmap
+
+This guide breaks down the AuthNexus project into manageable phases to help you complete the implementation successfully:
+
+1. **Foundation Phase (Weeks 1-2)**
+   - Set up development environment
+   - Configure backend and frontend infrastructure
+   - Implement basic authentication system
+
+2. **Core Features Phase (Weeks 3-5)**
+   - Build document management system
+   - Implement storage integration
+   - Create basic verification workflows
+
+3. **Advanced Features Phase (Weeks 6-8)**
+   - Integrate AI document analysis
+   - Implement blockchain anchoring
+   - Develop verification certificate generation
+
+4. **Integration Phase (Weeks 9-10)**
+   - Connect with external systems (Salesforce, n8n)
+   - Implement webhooks and notifications
+   - Build dashboard analytics
+
+5. **Testing and Deployment Phase (Weeks 11-12)**
+   - Comprehensive testing
+   - Security audits
+   - Production deployment
+
+## Development Environment Setup
+
+### Prerequisites Installation
+
+Before starting development, ensure you have the following tools installed:
+
+1. **Python Environment Setup**:
+   Install Python 3.9+ and set up your environment:
+   ```bash
+   # Install Python 3.9+ from https://www.python.org/downloads/
+   # Verify installation
+   python --version
+   
+   # Install virtualenv if not already installed
+   pip install virtualenv
+   ```
+
+2. **Node.js Installation**:
+   Install Node.js 18+ for frontend development:
+   ```bash
+   # Download and install from https://nodejs.org/
+   # Verify installation
+   node --version
+   npm --version
+   ```
+
+3. **Docker Setup** (optional but recommended):
+   ```bash
+   # Download and install Docker Desktop from https://www.docker.com/products/docker-desktop
+   # Verify installation
+   docker --version
+   ```
+
+4. **Database Setup**:
+   For local development, you can use:
+   - Supabase local development: https://supabase.com/docs/guides/local-development
+   - Or PostgreSQL directly: https://www.postgresql.org/download/
+
+5. **IDE Configuration**:
+   Visual Studio Code with the following extensions is recommended:
+   - Python extension
+   - ESLint
+   - Prettier
+   - Docker
+   - REST Client
+   - GitLens
+
+### Backend Configuration
+
+Follow these steps to set up and configure the backend:
+
+#### Step 1: Clone and Configure Repository
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-org/authnexus.git
+   cd authnexus/backend
+   ```
+
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   # On Windows
+   venv\Scripts\activate
+   # On macOS/Linux
+   source venv/bin/activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   For development without blockchain integration:
+   ```bash
+   pip install --no-deps -r requirements.txt
+   pip install pydantic-settings supabase requests
+   ```
+
+#### Step 2: Environment Configuration
+
+1. Create a `.env` file by copying the template:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit the `.env` file with your specific configuration:
+   ```
+   # API settings
+   API_V1_STR="/api/v1"
+   PROJECT_NAME="AuthNexus"
+   
+   # CORS settings
+   CORS_ORIGINS="http://localhost:3000"
+   
+   # Supabase settings (get these from your Supabase dashboard)
+   SUPABASE_URL="https://your-project.supabase.co"
+   SUPABASE_KEY="your-anon-key"
+   SUPABASE_BUCKET="documents"
+   
+   # For development, you can use placeholders for these services:
+   SUI_RPC_URL="https://fullnode.devnet.sui.io:443"
+   SUI_PACKAGE_ID="0x1234"
+   SUI_PRIVATE_KEY="0x5678"
+   
+   N8N_WEBHOOK_URL="http://localhost:5678/webhook/authnexus"
+   N8N_API_KEY="n8n_api_key"
+   
+   SALESFORCE_CLIENT_ID="client_id"
+   SALESFORCE_CLIENT_SECRET="client_secret"
+   SALESFORCE_AUTH_URL="https://login.salesforce.com"
+   SALESFORCE_TOKEN_URL="https://login.salesforce.com/services/oauth2/token"
+   SALESFORCE_CALLBACK_URL="http://localhost:8000/api/v1/auth/oauth/callback"
+   ```
+
+   For production, secure these values appropriately and never commit them to version control.
+
+#### Step 3: Database Setup
+
+1. For development with Supabase:
+   - Create a new project on Supabase.com
+   - Get your project URL and anon key from the API settings
+   - Add these to your `.env` file
+   - Create a storage bucket called "documents" in the Supabase Storage section
+
+2. For local development with PostgreSQL:
+   - Install PostgreSQL
+   - Create a database for AuthNexus
+   - Update the DATABASE_URL in your `.env` file
+
+3. Initialize the database schema:
+   ```bash
+   # If using migrations
+   python -m alembic upgrade head
+   
+   # Or for development, create tables automatically
+   # This requires modifying the main.py to include:
+   # from models.models import Base
+   # from core.database import engine
+   # Base.metadata.create_all(bind=engine)
+   ```
+
+#### Step 4: Running the Backend
+
+1. Start the development server:
+   ```bash
+   python -m uvicorn main:app --reload
+   ```
+
+2. Verify the API is running by accessing:
+   - API base: http://127.0.0.1:8000/
+   - API documentation: http://127.0.0.1:8000/docs
+
+### Frontend Configuration
+
+Follow these steps to set up and configure the frontend:
+
+#### Step 1: Install Dependencies
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd ../frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+#### Step 2: Configure Environment Variables
+
+1. Create a `.env.local` file:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+   ```
+
+2. For different environments, create additional files:
+   - `.env.development` - Development-specific variables
+   - `.env.test` - Test environment variables
+   - `.env.production` - Production environment variables
+
+#### Step 3: Running the Frontend
+
+1. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+2. The frontend will be accessible at http://localhost:3000
+
+## Implementing Core Features
+
+This section provides detailed instructions for implementing each core feature of AuthNexus.
+
+### Authentication System
+
+The authentication system is the foundation of user access control.
+
+#### User Registration and Login Implementation
+
+1. **Configure JWT Settings**:
+   Create a file `services/auth/jwt.py` with the following content:
+   ```python
+   import jwt
+   from datetime import datetime, timedelta
+   from typing import Optional
+   from core.config import get_settings
+   
+   settings = get_settings()
+   
+   def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+       """Generate a JWT token for authentication"""
+       to_encode = data.copy()
+       expire = datetime.utcnow() + (expires_delta or timedelta(minutes=30))
+       to_encode.update({"exp": expire})
+       
+       encoded_jwt = jwt.encode(
+           to_encode,
+           settings.SECRET_KEY,
+           algorithm=settings.ALGORITHM
+       )
+       return encoded_jwt
+   
+   def decode_token(token: str):
+       """Decode and validate a JWT token"""
+       return jwt.decode(
+           token,
+           settings.SECRET_KEY,
+           algorithms=[settings.ALGORITHM]
+       )
+   ```
+
+2. **Update Configuration**:
+   Add JWT settings to `core/config.py`:
+   ```python
+   SECRET_KEY: str = "your-secret-key-for-development"
+   ALGORITHM: str = "HS256"
+   ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+   ```
+
+3. **Implement User Model**:
+   In `models/models.py`, define the user model:
+   ```python
+   from sqlalchemy import Column, String, Boolean, DateTime
+   from sqlalchemy.sql import func
+   from core.database import Base
+   import uuid
+   
+   class User(Base):
+       __tablename__ = "users"
+       
+       id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+       email = Column(String, unique=True, index=True)
+       password_hash = Column(String)
+       name = Column(String)
+       is_active = Column(Boolean, default=True)
+       created_at = Column(DateTime(timezone=True), server_default=func.now())
+   ```
+
+4. **Create User Schemas**:
+   In `schemas/user.py`, define the request/response schemas:
+   ```python
+   from pydantic import BaseModel, EmailStr
+   from typing import Optional
+   from datetime import datetime
+   
+   class UserBase(BaseModel):
+       email: EmailStr
+       name: str
+   
+   class UserCreate(UserBase):
+       password: str
+   
+   class UserLogin(BaseModel):
+       email: EmailStr
+       password: str
+   
+   class UserResponse(UserBase):
+       id: str
+       created_at: datetime
+       
+       class Config:
+           orm_mode = True
+   
+   class TokenResponse(BaseModel):
+       access_token: str
+       token_type: str
+       user: UserResponse
+   ```
+
+5. **Implement Authentication Routes**:
+   In `routers/auth.py`, add routes for registration and login:
+   ```python
+   from fastapi import APIRouter, Depends, HTTPException, status
+   from fastapi.security import OAuth2PasswordBearer
+   from sqlalchemy.orm import Session
+   from passlib.context import CryptContext
+   from core.database import get_db
+   from models.models import User
+   from schemas.user import UserCreate, UserLogin, UserResponse, TokenResponse
+   from services.auth.jwt import create_access_token
+   from datetime import timedelta
+   from core.config import get_settings
+   
+   router = APIRouter()
+   settings = get_settings()
+   
+   # Password hashing
+   pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+   oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+   
+   @router.post("/register", response_model=UserResponse)
+   def register_user(user: UserCreate, db: Session = Depends(get_db)):
+       # Check if user exists
+       db_user = db.query(User).filter(User.email == user.email).first()
+       if db_user:
+           raise HTTPException(status_code=400, detail="Email already registered")
+           
+       # Create new user with hashed password
+       hashed_password = pwd_context.hash(user.password)
+       db_user = User(
+           email=user.email,
+           name=user.name,
+           password_hash=hashed_password
+       )
+       
+       db.add(db_user)
+       db.commit()
+       db.refresh(db_user)
+       
+       return db_user
+   
+   @router.post("/login", response_model=TokenResponse)
+   def login_user(user_credentials: UserLogin, db: Session = Depends(get_db)):
+       # Find user by email
+       user = db.query(User).filter(User.email == user_credentials.email).first()
+       if not user:
+           raise HTTPException(
+               status_code=status.HTTP_401_UNAUTHORIZED,
+               detail="Invalid credentials"
+           )
+           
+       # Verify password
+       if not pwd_context.verify(user_credentials.password, user.password_hash):
+           raise HTTPException(
+               status_code=status.HTTP_401_UNAUTHORIZED,
+               detail="Invalid credentials"
+           )
+           
+       # Generate JWT token
+       access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+       access_token = create_access_token(
+           data={"sub": user.id},
+           expires_delta=access_token_expires
+       )
+       
+       return {
+           "access_token": access_token,
+           "token_type": "bearer",
+           "user": user
+       }
+   ```
+
+6. **Create Authentication Middleware**:
+   Create a file `services/auth/dependencies.py`:
+   ```python
+   from fastapi import Depends, HTTPException, status
+   from fastapi.security import OAuth2PasswordBearer
+   from sqlalchemy.orm import Session
+   from core.database import get_db
+   from models.models import User
+   from services.auth.jwt import decode_token
+   from jose import JWTError
+   
+   oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+   
+   def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+       try:
+           payload = decode_token(token)
+           user_id = payload.get("sub")
+           if user_id is None:
+               raise HTTPException(
+                   status_code=status.HTTP_401_UNAUTHORIZED,
+                   detail="Invalid authentication credentials"
+               )
+       except JWTError:
+           raise HTTPException(
+               status_code=status.HTTP_401_UNAUTHORIZED,
+               detail="Invalid authentication credentials"
+           )
+           
+       user = db.query(User).filter(User.id == user_id).first()
+       if user is None:
+           raise HTTPException(
+               status_code=status.HTTP_401_UNAUTHORIZED,
+               detail="User not found"
+           )
+           
+       return user
+   ```
+
+### Document Management System
+
+Now, implement the document management features:
+
+#### Document Storage and Retrieval
+
+1. **Create Document Model**:
+   In `models/models.py`, add:
+   ```python
+   class Document(Base):
+       __tablename__ = "documents"
+       
+       id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+       filename = Column(String)
+       storage_path = Column(String)
+       content_type = Column(String)
+       size = Column(Integer)
+       user_id = Column(String, ForeignKey("users.id"))
+       upload_date = Column(DateTime(timezone=True), server_default=func.now())
+       metadata = Column(JSON, default={})
+       
+       # Relationship to User
+       user = relationship("User", back_populates="documents")
+   ```
+
+   Also update the User model:
+   ```python
+   class User(Base):
+       # ... existing fields
+       
+       # Relationships
+       documents = relationship("Document", back_populates="user")
+   ```
+
+2. **Create Document Schemas**:
+   In `schemas/document.py`:
+   ```python
+   from pydantic import BaseModel
+   from typing import Optional, Dict, Any
+   from datetime import datetime
+   
+   class DocumentBase(BaseModel):
+       filename: str
+       content_type: str
+       
+   class DocumentCreate(DocumentBase):
+       metadata: Optional[Dict[str, Any]] = {}
+       
+   class DocumentResponse(DocumentBase):
+       id: str
+       size: int
+       upload_date: datetime
+       user_id: str
+       storage_path: str
+       metadata: Dict[str, Any]
+       
+       class Config:
+           orm_mode = True
+   ```
+
+3. **Implement Document Routes**:
+   In `routers/documents.py`:
+   ```python
+   from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+   from sqlalchemy.orm import Session
+   from typing import List, Optional, Dict, Any
+   import json
+   
+   from core.database import get_db
+   from models.models import Document
+   from schemas.document import DocumentResponse
+   from services.auth.dependencies import get_current_user
+   from services.storage.supabase import storage_service
+   
+   router = APIRouter()
+   
+   @router.post("/", response_model=DocumentResponse)
+   async def upload_document(
+       file: UploadFile = File(...),
+       metadata: Optional[str] = Form(None),
+       current_user = Depends(get_current_user),
+       db: Session = Depends(get_db)
+   ):
+       # Parse metadata if provided
+       metadata_dict = {}
+       if metadata:
+           try:
+               metadata_dict = json.loads(metadata)
+           except json.JSONDecodeError:
+               raise HTTPException(status_code=400, detail="Invalid metadata JSON")
+       
+       # Upload file to storage
+       storage_path = await storage_service.upload_file(file, current_user.id)
+       
+       # Create document record
+       document = Document(
+           filename=file.filename,
+           storage_path=storage_path,
+           content_type=file.content_type,
+           size=file.size,
+           user_id=current_user.id,
+           metadata=metadata_dict
+       )
+       
+       db.add(document)
+       db.commit()
+       db.refresh(document)
+       
+       return document
+       
+   @router.get("/{document_id}", response_model=DocumentResponse)
+   def get_document(
+       document_id: str,
+       current_user = Depends(get_current_user),
+       db: Session = Depends(get_db)
+   ):
+       document = db.query(Document).filter(
+           Document.id == document_id,
+           Document.user_id == current_user.id
+       ).first()
+       
+       if not document:
+           raise HTTPException(status_code=404, detail="Document not found")
+           
+       return document
+       
+   @router.get("/", response_model=List[DocumentResponse])
+   def list_documents(
+       current_user = Depends(get_current_user),
+       db: Session = Depends(get_db),
+       skip: int = 0,
+       limit: int = 100
+   ):
+       documents = db.query(Document).filter(
+           Document.user_id == current_user.id
+       ).offset(skip).limit(limit).all()
+       
+       return documents
+       
+   @router.delete("/{document_id}")
+   def delete_document(
+       document_id: str,
+       current_user = Depends(get_current_user),
+       db: Session = Depends(get_db)
+   ):
+       document = db.query(Document).filter(
+           Document.id == document_id,
+           Document.user_id == current_user.id
+       ).first()
+       
+       if not document:
+           raise HTTPException(status_code=404, detail="Document not found")
+           
+       # Delete from storage
+       storage_service.delete_file(document.storage_path)
+       
+       # Delete from database
+       db.delete(document)
+       db.commit()
+       
+       return {"message": "Document deleted successfully"}
+   ```
+
+### Verification System
+
+Implement the document verification system:
+
+#### Verification Process
+
+1. **Create Verification Model**:
+   In `models/models.py`, add:
+   ```python
+   class VerificationStatus(str, Enum):
+       PENDING = "PENDING"
+       VERIFIED = "VERIFIED"
+       REJECTED = "REJECTED"
+       EXPIRED = "EXPIRED"
+       REVOKED = "REVOKED"
+       
+   class Verification(Base):
+       __tablename__ = "verifications"
+       
+       id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+       document_id = Column(String, ForeignKey("documents.id"))
+       status = Column(String, default=VerificationStatus.PENDING)
+       created_at = Column(DateTime(timezone=True), server_default=func.now())
+       completed_at = Column(DateTime(timezone=True), nullable=True)
+       verification_data = Column(JSON, default={})
+       blockchain_tx_hash = Column(String, nullable=True)
+       
+       # Relationship to Document
+       document = relationship("Document", back_populates="verifications")
+   ```
+
+   Update the Document model:
+   ```python
+   class Document(Base):
+       # ... existing fields
+       
+       # Relationships
+       verifications = relationship("Verification", back_populates="document")
+   ```
+
+2. **Create Verification Schemas**:
+   Create `schemas/verification.py`:
+   ```python
+   from pydantic import BaseModel
+   from typing import Dict, Any, Optional
+   from datetime import datetime
+   
+   class VerificationCreate(BaseModel):
+       document_id: str
+       verification_type: str
+       verification_options: Dict[str, Any] = {}
+       
+   class VerificationResponse(BaseModel):
+       id: str
+       document_id: str
+       status: str
+       created_at: datetime
+       completed_at: Optional[datetime] = None
+       verification_data: Dict[str, Any] = {}
+       blockchain_tx_hash: Optional[str] = None
+       
+       class Config:
+           orm_mode = True
+   ```
+
+3. **Implement AI Verification Service**:
+   In `services/ai/document_verification.py`:
+   ```python
+   from typing import Dict, Any
+   import time
+   
+   class DocumentVerificationService:
+       def __init__(self):
+           # In a real implementation, this would initialize ML models
+           pass
+           
+       async def verify_document(self, document_path: str, doc_type: str, options: Dict[str, Any]) -> Dict[str, Any]:
+           """
+           Perform AI-based verification of document
+           In a production implementation, this would use real ML models
+           """
+           # Mock verification for development
+           # In production, this would call actual ML models
+           
+           # Simulate processing time
+           await asyncio.sleep(2)
+           
+           # Return mock verification results
+           return {
+               "authenticity": "PASSED",
+               "expiry": "PASSED" if options.get("check_expiry", True) else "NOT_CHECKED",
+               "forgery_detection": "PASSED" if options.get("check_forgery", True) else "NOT_CHECKED",
+               "confidence_score": 0.95,
+               "extracted_data": {
+                   "name": "John Doe",
+                   "document_number": "X12345678",
+                   "issue_date": "2020-01-01",
+                   "expiry_date": "2030-01-01"
+               }
+           }
+   
+   # Create a singleton instance
+   verification_service = DocumentVerificationService()
+   ```
+
+4. **Implement Blockchain Anchoring Service**:
+   In `services/blockchain/sui.py`:
+   ```python
+   from typing import Dict, Any
+   import json
+   import hashlib
+   import uuid
+   
+   try:
+       from pysui.sui.client import SuiClient
+       from pysui.sui.sui_txn import SuiTransaction
+       PYSUI_AVAILABLE = True
+   except ImportError:
+       PYSUI_AVAILABLE = False
+       
+   from core.config import get_settings
+   
+   settings = get_settings()
+   
+   class SuiBlockchainService:
+       def __init__(self):
+           self.rpc_url = settings.SUI_RPC_URL
+           self.package_id = settings.SUI_PACKAGE_ID
+           self.private_key = settings.SUI_PRIVATE_KEY
+           self.client = None
+           
+           if PYSUI_AVAILABLE:
+               try:
+                   self.client = SuiClient(self.rpc_url)
+               except Exception as e:
+                   print(f"Error initializing Sui client: {e}")
+                   self.client = None
+                   
+       def _generate_document_hash(self, verification_data: Dict[str, Any]) -> str:
+           """Generate a hash for the document verification data."""
+           data_bytes = json.dumps(verification_data, sort_keys=True).encode('utf-8')
+           return hashlib.sha256(data_bytes).hexdigest()
+           
+       async def anchor_verification(self, verification_id: str, document_id: str, verification_data: Dict[str, Any]) -> str:
+           """
+           Anchor verification results to the blockchain
+           For development without Sui, returns a mock transaction hash
+           """
+           # Generate a hash of the verification data
+           doc_hash = self._generate_document_hash(verification_data)
+           
+           if PYSUI_AVAILABLE and self.client:
+               try:
+                   # In a real implementation, this would call Sui blockchain
+                   # For now, we'll just return a mock transaction hash
+                   return f"0x{uuid.uuid4().hex}"
+               except Exception as e:
+                   print(f"Error anchoring to blockchain: {e}")
+                   return f"mock_tx_{uuid.uuid4().hex}"
+           else:
+               # Return a mock transaction hash for development
+               print("Using mock blockchain service")
+               return f"mock_tx_{uuid.uuid4().hex}"
+               
+   # Create a singleton instance
+   blockchain_service = SuiBlockchainService()
+   ```
+
+5. **Implement Verification Routes**:
+   Create or update `routers/documents.py` to add verification endpoints:
+   ```python
+   from services.ai.document_verification import verification_service
+   from services.blockchain.sui import blockchain_service
+   from models.models import Verification, VerificationStatus
+   from schemas.verification import VerificationCreate, VerificationResponse
+   
+   # Add these routes to documents.py
+   
+   @router.post("/verify/", response_model=VerificationResponse)
+   async def verify_document(
+       verification: VerificationCreate,
+       current_user = Depends(get_current_user),
+       db: Session = Depends(get_db)
+   ):
+       # Get the document
+       document = db.query(Document).filter(
+           Document.id == verification.document_id,
+           Document.user_id == current_user.id
+       ).first()
+       
+       if not document:
+           raise HTTPException(status_code=404, detail="Document not found")
+           
+       # Create verification record
+       verification_record = Verification(
+           document_id=document.id,
+           status=VerificationStatus.PENDING,
+       )
+       
+       db.add(verification_record)
+       db.commit()
+       db.refresh(verification_record)
+       
+       # Start background task for verification
+       # In a production app, you'd use Celery or similar
+       background_tasks.add_task(
+           process_verification,
+           verification_record.id,
+           document.storage_path,
+           verification.verification_type,
+           verification.verification_options,
+           db
+       )
+       
+       return verification_record
+       
+   async def process_verification(
+       verification_id: str,
+       document_path: str,
+       verification_type: str,
+       options: Dict[str, Any],
+       db: Session
+   ):
+       """Background task to process verification"""
+       try:
+           # Get session for background task
+           db_session = SessionLocal()
+           
+           # Run AI verification
+           verification_results = await verification_service.verify_document(
+               document_path, verification_type, options
+           )
+           
+           # Get verification record
+           verification = db_session.query(Verification).filter(
+               Verification.id == verification_id
+           ).first()
+           
+           if not verification:
+               print(f"Verification {verification_id} not found")
+               return
+               
+           # Update verification data
+           verification.verification_data = verification_results
+           
+           # Determine status based on results
+           all_passed = all(
+               result == "PASSED" 
+               for key, result in verification_results.items() 
+               if key not in ["confidence_score", "extracted_data"]
+           )
+           
+           verification.status = VerificationStatus.VERIFIED if all_passed else VerificationStatus.REJECTED
+           verification.completed_at = datetime.now()
+           
+           # Anchor to blockchain if verified
+           if verification.status == VerificationStatus.VERIFIED:
+               tx_hash = await blockchain_service.anchor_verification(
+                   verification.id,
+                   verification.document_id,
+                   verification_results
+               )
+               verification.blockchain_tx_hash = tx_hash
+               
+           db_session.commit()
+           
+       except Exception as e:
+           print(f"Error in verification process: {e}")
+           # In production, implement proper error handling and logging
+       finally:
+           # Close session
+           db_session.close()
+           
+   @router.get("/verify/{verification_id}", response_model=VerificationResponse)
+   def get_verification(
+       verification_id: str,
+       current_user = Depends(get_current_user),
+       db: Session = Depends(get_db)
+   ):
+       # Get verification with document check
+       verification = db.query(Verification).join(Document).filter(
+           Verification.id == verification_id,
+           Document.user_id == current_user.id
+       ).first()
+       
+       if not verification:
+           raise HTTPException(status_code=404, detail="Verification not found")
+           
+       return verification
+   ```
+
+## Frontend Implementation
+
+### Setting Up Frontend Components
+
+1. **Configure API Client**:
+   Create `lib/api.ts` for API communication:
+   ```typescript
+   import axios from 'axios';
+
+   const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+
+   const api = axios.create({
+     baseURL: API_URL,
+     headers: {
+       'Content-Type': 'application/json',
+     },
+   });
+
+   // Add request interceptor for authentication
+   api.interceptors.request.use((config) => {
+     const token = localStorage.getItem('authToken');
+     if (token) {
+       config.headers.Authorization = `Bearer ${token}`;
+     }
+     return config;
+   });
+
+   // Auth API
+   export const register = (data: any) => api.post('/auth/register', data);
+   export const login = (data: any) => api.post('/auth/login', data);
+   export const getUserProfile = () => api.get('/auth/me');
+
+   // Document API
+   export const uploadDocument = (formData: FormData) => 
+     api.post('/documents/', formData, {
+       headers: { 'Content-Type': 'multipart/form-data' },
+     });
+   export const getDocuments = () => api.get('/documents/');
+   export const getDocument = (id: string) => api.get(`/documents/${id}`);
+   export const deleteDocument = (id: string) => api.delete(`/documents/${id}`);
+
+   // Verification API
+   export const verifyDocument = (data: any) => api.post('/documents/verify/', data);
+   export const getVerification = (id: string) => api.get(`/documents/verify/${id}`);
+
+   export default api;
+   ```
+
+2. **Create Authentication Components**:
+   Create `components/auth/LoginForm.tsx`:
+   ```tsx
+   import React, { useState } from 'react';
+   import { useRouter } from 'next/router';
+   import { login } from '../../lib/api';
+
+   const LoginForm = () => {
+     const [email, setEmail] = useState('');
+     const [password, setPassword] = useState('');
+     const [error, setError] = useState('');
+     const [loading, setLoading] = useState(false);
+     const router = useRouter();
+
+     const handleSubmit = async (e: React.FormEvent) => {
+       e.preventDefault();
+       setError('');
+       setLoading(true);
+
+       try {
+         const response = await login({ email, password });
+         localStorage.setItem('authToken', response.data.access_token);
+         localStorage.setItem('user', JSON.stringify(response.data.user));
+         router.push('/dashboard');
+       } catch (err: any) {
+         setError(err.response?.data?.detail || 'Login failed');
+       } finally {
+         setLoading(false);
+       }
+     };
+
+     return (
+       <div className="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow-md">
+         <h2 className="text-2xl font-bold mb-6 text-center">Login to AuthNexus</h2>
+         
+         {error && (
+           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+             {error}
+           </div>
+         )}
+         
+         <form onSubmit={handleSubmit}>
+           <div className="mb-4">
+             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+               Email
+             </label>
+             <input
+               id="email"
+               type="email"
+               value={email}
+               onChange={(e) => setEmail(e.target.value)}
+               required
+               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+             />
+           </div>
+           
+           <div className="mb-6">
+             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+               Password
+             </label>
+             <input
+               id="password"
+               type="password"
+               value={password}
+               onChange={(e) => setPassword(e.target.value)}
+               required
+               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+             />
+           </div>
+           
+           <button
+             type="submit"
+             disabled={loading}
+             className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50"
+           >
+             {loading ? 'Loading...' : 'Login'}
+           </button>
+         </form>
+       </div>
+     );
+   };
+
+   export default LoginForm;
+   ```
+
+3. **Create Document Upload Component**:
+   Create `components/documents/UploadForm.tsx`:
+   ```tsx
+   import React, { useState } from 'react';
+   import { uploadDocument } from '../../lib/api';
+
+   const DocumentUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
+     const [file, setFile] = useState<File | null>(null);
+     const [metadata, setMetadata] = useState('');
+     const [loading, setLoading] = useState(false);
+     const [error, setError] = useState('');
+     const [success, setSuccess] = useState(false);
+
+     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+       if (e.target.files && e.target.files.length > 0) {
+         setFile(e.target.files[0]);
+       }
+     };
+
+     const handleSubmit = async (e: React.FormEvent) => {
+       e.preventDefault();
+       
+       if (!file) {
+         setError('Please select a file to upload');
+         return;
+       }
+       
+       setLoading(true);
+       setError('');
+       setSuccess(false);
+       
+       try {
+         const formData = new FormData();
+         formData.append('file', file);
+         
+         if (metadata) {
+           try {
+             // Validate JSON
+             JSON.parse(metadata);
+             formData.append('metadata', metadata);
+           } catch (err) {
+             setError('Invalid metadata JSON format');
+             setLoading(false);
+             return;
+           }
+         }
+         
+         const response = await uploadDocument(formData);
+         setSuccess(true);
+         setFile(null);
+         setMetadata('');
+         
+         if (onSuccess) {
+           onSuccess();
+         }
+       } catch (err: any) {
+         console.error('Upload error:', err);
+         setError(err.response?.data?.detail || 'Upload failed');
+       } finally {
+         setLoading(false);
+       }
+     };
+
+     return (
+       <div className="bg-white p-6 rounded-lg shadow-md">
+         <h2 className="text-xl font-bold mb-4">Upload Document</h2>
+         
+         {error && (
+           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+             {error}
+           </div>
+         )}
+         
+         {success && (
+           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+             Document uploaded successfully!
+           </div>
+         )}
+         
+         <form onSubmit={handleSubmit}>
+           <div className="mb-4">
+             <label className="block text-gray-700 text-sm font-bold mb-2">
+               Select Document
+             </label>
+             <input
+               type="file"
+               onChange={handleFileChange}
+               className="w-full px-3 py-2 border border-gray-300 rounded-md"
+             />
+             {file && (
+               <p className="mt-2 text-sm text-gray-600">
+                 Selected: {file.name} ({Math.round(file.size / 1024)} KB)
+               </p>
+             )}
+           </div>
+           
+           <div className="mb-4">
+             <label className="block text-gray-700 text-sm font-bold mb-2">
+               Metadata (optional JSON)
+             </label>
+             <textarea
+               value={metadata}
+               onChange={(e) => setMetadata(e.target.value)}
+               placeholder='{"docType": "passport", "country": "USA"}'
+               rows={4}
+               className="w-full px-3 py-2 border border-gray-300 rounded-md"
+             />
+           </div>
+           
+           <button
+             type="submit"
+             disabled={loading || !file}
+             className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50"
+           >
+             {loading ? 'Uploading...' : 'Upload Document'}
+           </button>
+         </form>
+       </div>
+     );
+   };
+
+   export default DocumentUploadForm;
+   ```
+
+4. **Create Document List Component**:
+   Create `components/documents/DocumentList.tsx`:
+   ```tsx
+   import React, { useEffect, useState } from 'react';
+   import { getDocuments, verifyDocument, deleteDocument } from '../../lib/api';
+   import Link from 'next/link';
+
+   interface Document {
+     id: string;
+     filename: string;
+     content_type: string;
+     size: number;
+     upload_date: string;
+     metadata: any;
+   }
+
+   const DocumentList = () => {
+     const [documents, setDocuments] = useState<Document[]>([]);
+     const [loading, setLoading] = useState(true);
+     const [error, setError] = useState('');
+     
+     const fetchDocuments = async () => {
+       setLoading(true);
+       try {
+         const response = await getDocuments();
+         setDocuments(response.data);
+       } catch (err: any) {
+         console.error('Failed to fetch documents:', err);
+         setError('Failed to load documents');
+       } finally {
+         setLoading(false);
+       }
+     };
+     
+     useEffect(() => {
+       fetchDocuments();
+     }, []);
+     
+     const handleVerify = async (documentId: string) => {
+       try {
+         await verifyDocument({
+           document_id: documentId,
+           verification_type: 'identity_document',
+           verification_options: {
+             check_expiry: true,
+             check_forgery: true
+           }
+         });
+         alert('Document verification started!');
+       } catch (err: any) {
+         console.error('Verification error:', err);
+         alert('Failed to start verification');
+       }
+     };
+     
+     const handleDelete = async (documentId: string) => {
+       if (!confirm('Are you sure you want to delete this document?')) return;
+       
+       try {
+         await deleteDocument(documentId);
+         fetchDocuments(); // Refresh the list
+       } catch (err: any) {
+         console.error('Delete error:', err);
+         alert('Failed to delete document');
+       }
+     };
+
+     if (loading) return <div className="text-center py-4">Loading documents...</div>;
+     if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
+     
+     return (
+       <div className="bg-white rounded-lg shadow-md overflow-hidden">
+         <div className="px-6 py-4 border-b border-gray-200">
+           <h2 className="text-xl font-bold">Your Documents</h2>
+         </div>
+         
+         {documents.length === 0 ? (
+           <div className="p-6 text-center text-gray-500">
+             No documents found. Upload your first document!
+           </div>
+         ) : (
+           <ul className="divide-y divide-gray-200">
+             {documents.map((doc) => (
+               <li key={doc.id} className="p-4 hover:bg-gray-50">
+                 <div className="flex justify-between items-center">
+                   <div>
+                     <h3 className="font-medium">{doc.filename}</h3>
+                     <p className="text-sm text-gray-500">
+                       Uploaded on {new Date(doc.upload_date).toLocaleDateString()}
+                     </p>
+                     <p className="text-xs text-gray-400">
+                       {doc.content_type} • {Math.round(doc.size / 1024)} KB
+                     </p>
+                   </div>
+                   
+                   <div className="flex space-x-2">
+                     <Link href={`/documents/${doc.id}`}>
+                       <button className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">
+                         View
+                       </button>
+                     </Link>
+                     
+                     <button 
+                       onClick={() => handleVerify(doc.id)}
+                       className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200"
+                     >
+                       Verify
+                     </button>
+                     
+                     <button 
+                       onClick={() => handleDelete(doc.id)}
+                       className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200"
+                     >
+                       Delete
+                     </button>
+                   </div>
+                 </div>
+               </li>
+             ))}
+           </ul>
+         )}
+       </div>
+     );
+   };
+
+   export default DocumentList;
+   ```
+
+## Automating Development Workflows
+
+To automate your development workflow, we'll set up scripts and tools to streamline the process:
+
+### Backend Automation
+
+1. **Create Development Scripts** in the backend directory:
+   Create a `scripts` directory with the following files:
+
+   `scripts/reset_db.py`:
+   ```python
+   """Reset the database and create sample data for development"""
+   from sqlalchemy.sql import text
+   from core.database import SessionLocal, engine
+   import models.models as models
+
+   def reset_database():
+       db = SessionLocal()
+       try:
+           # Drop all tables
+           models.Base.metadata.drop_all(engine)
+           
+           # Create all tables
+           models.Base.metadata.create_all(engine)
+           
+           print("Database reset completed successfully!")
+       except Exception as e:
+           print(f"Error resetting database: {e}")
+       finally:
+           db.close()
+
+   if __name__ == "__main__":
+       reset_database()
+   ```
+
+   `scripts/create_test_data.py`:
+   ```python
+   """Create test data for development"""
+   from core.database import SessionLocal
+   from models.models import User, Document
+   from passlib.context import CryptContext
+   import uuid
+
+   pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+   def create_test_data():
+       db = SessionLocal()
+       try:
+           # Create test user
+           test_user = User(
+               email="test@example.com",
+               name="Test User",
+               password_hash=pwd_context.hash("password123")
+           )
+           db.add(test_user)
+           db.commit()
+           db.refresh(test_user)
+           
+           print(f"Created test user with ID: {test_user.id}")
+           
+           # Create test documents
+           doc1 = Document(
+               filename="sample_passport.pdf",
+               storage_path=f"{test_user.id}/sample_passport.pdf",
+               content_type="application/pdf",
+               size=1024 * 100,  # 100KB
+               user_id=test_user.id,
+               metadata={"document_type": "passport", "country": "USA"}
+           )
+           
+           doc2 = Document(
+               filename="sample_license.jpg",
+               storage_path=f"{test_user.id}/sample_license.jpg",
+               content_type="image/jpeg",
+               size=1024 * 75,  # 75KB
+               user_id=test_user.id,
+               metadata={"document_type": "driver_license", "state": "California"}
+           )
+           
+           db.add(doc1)
+           db.add(doc2)
+           db.commit()
+           
+           print("Created test documents")
+           
+       except Exception as e:
+           print(f"Error creating test data: {e}")
+           db.rollback()
+       finally:
+           db.close()
+
+   if __name__ == "__main__":
+       create_test_data()
+   ```
+
+2. **Create a Makefile** for common tasks:
+   ```makefile
+   .PHONY: run reset-db test lint
+
+   run:
+       python -m uvicorn main:app --reload
+
+   reset-db:
+       python scripts/reset_db.py
+
+   test-data:
+       python scripts/create_test_data.py
+
+   setup-dev: reset-db test-data
+
+   test:
+       pytest
+
+   lint:
+       flake8 .
+
+   format:
+       black .
+   ```
+
+### Frontend Automation
+
+1. **Update package.json Scripts** in the frontend directory:
+   ```json
+   "scripts": {
+     "dev": "next dev",
+     "build": "next build",
+     "start": "next start",
+     "lint": "next lint",
+     "test": "jest",
+     "test:watch": "jest --watch",
+     "type-check": "tsc --noEmit",
+     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+     "prepare": "husky install"
+   }
+   ```
+
+2. **Set up Husky for Git Hooks** to enforce code quality:
+   ```bash
+   cd frontend
+   npx husky init
+   ```
+
+   Create `.husky/pre-commit`:
+   ```bash
+   #!/bin/sh
+   . "$(dirname "$0")/_/husky.sh"
+
+   cd frontend
+   npm run lint
+   npm run type-check
+   ```
+
+   Create `.husky/pre-push`:
+   ```bash
+   #!/bin/sh
+   . "$(dirname "$0")/_/husky.sh"
+
+   cd frontend
+   npm test
+   ```
+
+### Docker Automation
+
+Create a full-stack Docker setup for easier development:
+
+1. **Create a Docker Compose** file in the root directory:
+   ```yaml
+   version: '3.8'
+
+   services:
+     frontend:
+       build:
+         context: ./frontend
+         dockerfile: Dockerfile.dev
+       ports:
+         - "3000:3000"
+       volumes:
+         - ./frontend:/app
+         - /app/node_modules
+       environment:
+         - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+         - NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
+         - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+       depends_on:
+         - backend
+
+     backend:
+       build:
+         context: ./backend
+         dockerfile: Dockerfile.dev
+       ports:
+         - "8000:8000"
+       volumes:
+         - ./backend:/app
+       environment:
+         - API_V1_STR=/api/v1
+         - PROJECT_NAME=AuthNexus
+         - CORS_ORIGINS=http://localhost:3000
+         - SUPABASE_URL=${SUPABASE_URL}
+         - SUPABASE_KEY=${SUPABASE_ANON_KEY}
+         - SUPABASE_BUCKET=documents
+         - SUI_RPC_URL=${SUI_RPC_URL:-https://fullnode.devnet.sui.io:443}
+         - SUI_PACKAGE_ID=${SUI_PACKAGE_ID:-0x1234}
+         - SUI_PRIVATE_KEY=${SUI_PRIVATE_KEY:-0x5678}
+   ```
+
+2. **Create Dockerfiles** for development:
+   
+   `frontend/Dockerfile.dev`:
+   ```dockerfile
+   FROM node:18-alpine
+
+   WORKDIR /app
+
+   COPY package.json package-lock.json ./
+   RUN npm ci
+
+   COPY . .
+
+   EXPOSE 3000
+   CMD ["npm", "run", "dev"]
+   ```
+
+   `backend/Dockerfile.dev`:
+   ```dockerfile
+   FROM python:3.9-slim
+
+   WORKDIR /app
+
+   RUN apt-get update && apt-get install -y --no-install-recommends \
+       build-essential \
+       && rm -rf /var/lib/apt/lists/*
+
+   COPY requirements.txt .
+   RUN pip install --no-cache-dir -r requirements.txt
+
+   COPY . .
+
+   EXPOSE 8000
+   CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--reload"]
+   ```
+
+## Continuous Integration and Deployment
+
+### Setting up GitHub Actions for CI/CD
+
+Create `.github/workflows/ci.yml`:
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov flake8
+      - name: Lint with flake8
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Test with pytest
+        run: pytest --cov
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type checking
+        run: npm run type-check
+      - name: Run tests
+        run: npm test
+
+  deploy:
+    needs: [backend-tests, frontend-tests]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to production
+        run: |
+          # Add deployment commands here
+          echo "Deploying to production..."
+```
+
+## Project Completion Checklist
+
+To ensure your AuthNexus project is complete and ready for production, use this checklist:
+
+### Backend Checklist
+- [ ] Authentication system is fully functional and secure
+- [ ] Document storage and retrieval works reliably
+- [ ] Verification system processes documents correctly
+- [ ] Blockchain anchoring is implemented (or mock service for development)
+- [ ] AI document analysis is functioning (or mock service for development)
+- [ ] API endpoints are properly documented
+- [ ] Error handling is comprehensive
+- [ ] Unit and integration tests are passing
+- [ ] Environment variables are properly configured
+- [ ] Database migrations are set up
+
+### Frontend Checklist
+- [ ] Authentication flow (login, register, logout) works correctly
+- [ ] Document upload and management UI is functional
+- [ ] Verification workflow is intuitive and working
+- [ ] Responsive design works on all screen sizes
+- [ ] Proper loading states and error handling
+- [ ] Unit tests for critical components
+- [ ] Type checking is passing without errors
+- [ ] Environment variables are properly configured
+
+### Security Checklist
+- [ ] Authentication tokens are properly secured
+- [ ] API endpoints have proper authorization checks
+- [ ] Input validation is thorough
+- [ ] CORS is properly configured
+- [ ] No sensitive information in client-side code
+- [ ] Proper error handling that doesn't leak system details
+- [ ] Database access is properly restricted
+- [ ] File uploads are properly validated and sanitized
+
+### Deployment Checklist
+- [ ] Production database is configured
+- [ ] Environment variables are set for production
+- [ ] CI/CD pipeline is working
+- [ ] Static assets are properly served
+- [ ] API endpoints are working in production
+- [ ] HTTPS is configured
+- [ ] Monitoring and logging are set up
+- [ ] Backup and recovery procedures are in place
+
+## Conclusion
+
+By following this detailed guide, you now have all the necessary steps to complete your AuthNexus project. The implementation provides a secure document verification system with AI-powered analysis and blockchain anchoring for tamper-proof results.
+
+For ongoing development and maintenance:
+- Regularly update dependencies to maintain security
+- Continue expanding test coverage
+- Monitor system performance in production
+- Gather user feedback to improve the UI/UX
+- Consider implementing additional security measures like MFA
+
+Remember that security is paramount for a system handling sensitive documents, so prioritize regular security audits and stay updated on best practices for secure development.
