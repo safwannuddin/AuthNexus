@@ -49,6 +49,32 @@ class VerificationResponse(VerificationBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True  # Updated from orm_mode for Pydantic v2
+
+class DocumentUploadResponse(BaseModel):
+    id: str
+    user_id: str
+    document_type: DocumentType
+    file_path: str
+    file_url: str
+    upload_status: str
+    description: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class VerificationResult(BaseModel):
+    is_verified: bool
+    confidence_score: Optional[float] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    
+class BlockchainLogResponse(BaseModel):
+    transaction_hash: str
+    document_id: str
+    verification_id: str
+    timestamp: datetime
+    status: str
 
 class DocumentResponse(DocumentBase):
     id: str

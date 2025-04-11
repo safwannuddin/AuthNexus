@@ -24,3 +24,18 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+    
+class TokenPayload(BaseModel):
+    sub: Optional[str] = None
+    exp: Optional[int] = None
+
+class UserDashboard(BaseModel):
+    user_id: str
+    total_documents: int
+    verified_documents: int
+    recent_activities: List[dict] = []
+    documents_by_type: dict = {}
+    verification_stats: dict = {}
+    
+    class Config:
+        from_attributes = True

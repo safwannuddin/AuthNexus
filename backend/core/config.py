@@ -15,8 +15,8 @@ class Settings(BaseSettings):
         "env_file": ".env",
         "env_file_encoding": "utf-8"
     }
-    
-    # Supabase settings    SUPABASE_URL: str
+      # Supabase settings
+    SUPABASE_URL: str
     SUPABASE_KEY: str
     SUPABASE_BUCKET: str = "documents"
     
