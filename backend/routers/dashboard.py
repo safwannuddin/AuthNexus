@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import uuid
 from datetime import datetime, timedelta
 import random
@@ -9,7 +9,8 @@ from schemas.document import VerificationResult
 
 router = APIRouter()
 
-@router.get("/stats/{user_id}", response_model=Dict[str, any])
+
+@router.get("/stats/{user_id}", response_model=Dict[str, Any])
 async def get_user_stats(user_id: str):
     """Get dashboard statistics for a user"""
     try:
@@ -29,7 +30,7 @@ async def get_user_stats(user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve statistics: {str(e)}")
 
-@router.get("/recent-activity/{user_id}", response_model=List[Dict[str, any]])
+@router.get("/recent-activity/{user_id}", response_model=List[Dict[str, Any]])
 async def get_recent_activity(
     user_id: str,
     limit: int = Query(5, ge=1, le=50)
