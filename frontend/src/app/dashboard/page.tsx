@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { loadSampleDocuments, fetchDocuments, DocumentItem } from '@/lib/documents';
+import { listAllFiles } from '@/lib/storage-test';
 import Header from '../../../components/dashboard/Header';
 import Sidebar from '../../../components/dashboard/Sidebar';
 import Image from 'next/image';
@@ -48,24 +49,37 @@ export default function DashboardPage() {
     try {
       setUploading(true);
       setError(null);
+      console.log('Starting upload process...'); // Debug log
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      console.log('Uploading file:', filePath); // Debug log
+
+      const { data, error: uploadError } = await supabase.storage
         .from('documents')
         .upload(filePath, file);
 
       if (uploadError) {
+        console.error('Upload error:', uploadError); // Debug log
         throw uploadError;
       }
 
-      // Refresh documents list after successful upload
+      console.log('Upload successful:', data); // Debug log
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      console.log('File public URL:', publicUrl); // Debug log
+
       await loadInitialData();
       alert('File uploaded successfully!');
       setFile(null);
     } catch (err) {
+      console.error('Upload failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to upload file');
     } finally {
       setUploading(false);
@@ -78,118 +92,89 @@ export default function DashboardPage() {
       <div className="flex">
         <Sidebar />
         <main className="flex-1 p-8">
-          {/* Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-              <h3 className="text-lg font-semibold mb-2">Total Documents</h3>
-              <p className="text-3xl font-bold">0</p>
-            </div>
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-              <h3 className="text-lg font-semibold mb-2">Verified Documents</h3>
-              <p className="text-3xl font-bold">0</p>
-            </div>
-            <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
-              <h3 className="text-lg font-semibold mb-2">Success Rate</h3>
-              <p className="text-3xl font-bold">0%</p>
-            </div>
-          </div>
-
-          {/* Upload Section */}
+          {/* File Upload Section */}
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 mb-8">
-            <h2 className="text-2xl font-bold mb-6 text-white">Document Upload</h2>
-            
+            <h2 className="text-2xl font-bold mb-6 text-white">Upload Document</h2>
             <div className="border-2 border-dashed border-gray-400/50 rounded-xl p-12 bg-white/5">
               <div className="space-y-6 text-center">
-                <div className="flex flex-col items-center justify-center">
-                  <div className="mb-4">
-                    <Image src="/file.svg" alt="Upload" width={64} height={64} className="opacity-75" />
-                  </div>
-                  <label className="cursor-pointer group">
-                    <input
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileChange}
-                      disabled={uploading}
-                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                    />
-                    <div className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                      {uploading ? 'Uploading...' : 'Select Document'}
-                    </div>
-                    <p className="mt-2 text-sm text-gray-300">
-                      Supported formats: PDF, DOC, DOCX, JPG, PNG
-                    </p>
-                  </label>
-                </div>
-                
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="file-upload"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg inline-block"
+                >
+                  Select Document
+                </label>
                 {file && (
-                  <div className="mt-6">
-                    <div className="bg-white/10 rounded-lg p-4 max-w-md mx-auto">
-                      <p className="text-sm text-gray-300">Selected file: {file.name}</p>
-                      <button
-                        onClick={handleUpload}
-                        disabled={uploading}
-                        className="mt-3 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 disabled:opacity-50"
-                      >
-                        {uploading ? 'Uploading...' : 'Upload Document'}
-                      </button>
-                    </div>
+                  <div className="mt-4">
+                    <p className="text-gray-300">Selected: {file.name}</p>
+                    <button
+                      onClick={handleUpload}
+                      disabled={uploading}
+                      className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg"
+                    >
+                      {uploading ? 'Uploading...' : 'Upload Document'}
+                    </button>
                   </div>
                 )}
-                
                 {error && (
-                  <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mt-4">
-                    <p className="text-red-400 text-sm">{error}</p>
-                  </div>
+                  <p className="text-red-500 mt-2">{error}</p>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Recent Uploads Section */}
+          {/* Recent Uploads Table */}
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8">
             <h2 className="text-2xl font-bold mb-6 text-white">Recent Uploads</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-gray-300">
                 <thead className="text-gray-400 border-b border-gray-700">
                   <tr>
-                    <th className="py-3 px-4">File Name</th>
-                    <th className="py-3 px-4">Upload Date</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Actions</th>
+                    <th className="py-4 px-4">File Name</th>
+                    <th className="py-4 px-4">Upload Date</th>
+                    <th className="py-4 px-4">Status</th>
+                    <th className="py-4 px-4">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentUploads.length === 0 ? (
-                    <tr className="border-b border-gray-700/50">
-                      <td className="py-4 px-4" colSpan={4}>
-                        No documents uploaded yet
+                  {recentUploads.map((doc) => (
+                    <tr key={doc.id} className="border-b border-gray-700/50">
+                      <td className="py-4 px-4">{doc.name}</td>
+                      <td className="py-4 px-4">{new Date(doc.created_at).toLocaleDateString()}</td>
+                      <td className="py-4 px-4">
+                        <span className="px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-300">
+                          Pending
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <button 
+                          className="text-blue-400 hover:text-blue-300"
+                          onClick={() => window.open(doc.url, '_blank')}
+                        >
+                          View
+                        </button>
                       </td>
                     </tr>
-                  ) : (
-                    recentUploads.map((doc) => (
-                      <tr key={doc.id} className="border-b border-gray-700/50">
-                        <td className="py-4 px-4">{doc.name}</td>
-                        <td className="py-4 px-4">{new Date(doc.created_at).toLocaleDateString()}</td>
-                        <td className="py-4 px-4">
-                          <span className="px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-300">
-                            Pending
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <button 
-                            className="text-blue-400 hover:text-blue-300"
-                            onClick={() => window.open(doc.url, '_blank')}
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
+          <button
+  onClick={async () => {
+    const files = await listAllFiles();
+    console.log('Current files in storage:', files);
+  }}
+  className="text-blue-400 hover:text-blue-300 ml-4"
+>
+  Check Storage
+</button>
         </main>
       </div>
     </div>
