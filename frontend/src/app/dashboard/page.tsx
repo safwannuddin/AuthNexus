@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { loadSampleDocuments, fetchDocuments, DocumentItem } from '@/lib/documents';
 import Header from '../../../components/dashboard/Header';
 import Sidebar from '../../../components/dashboard/Sidebar';
 import Image from 'next/image';
@@ -10,7 +11,25 @@ export default function DashboardPage() {
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [recentUploads, setRecentUploads] = useState([]);
+  const [recentUploads, setRecentUploads] = useState<DocumentItem[]>([]);
+
+  // Update the useEffect to also refresh documents after upload
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  const loadInitialData = async () => {
+    try {
+      console.log('Loading sample documents...');
+      await loadSampleDocuments();
+      console.log('Fetching documents...');
+      const documents = await fetchDocuments();
+      console.log('Documents fetched:', documents);
+      setRecentUploads(documents);
+    } catch (error) {
+      console.error('Failed to load documents:', error);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -19,6 +38,7 @@ export default function DashboardPage() {
     }
   };
 
+  // Modify handleUpload to refresh documents after successful upload
   const handleUpload = async () => {
     if (!file) {
       setError('Please select a file first');
@@ -41,6 +61,8 @@ export default function DashboardPage() {
         throw uploadError;
       }
 
+      // Refresh documents list after successful upload
+      await loadInitialData();
       alert('File uploaded successfully!');
       setFile(null);
     } catch (err) {
@@ -137,11 +159,33 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-gray-700/50">
-                    <td className="py-4 px-4" colSpan={4}>
-                      No documents uploaded yet
-                    </td>
-                  </tr>
+                  {recentUploads.length === 0 ? (
+                    <tr className="border-b border-gray-700/50">
+                      <td className="py-4 px-4" colSpan={4}>
+                        No documents uploaded yet
+                      </td>
+                    </tr>
+                  ) : (
+                    recentUploads.map((doc) => (
+                      <tr key={doc.id} className="border-b border-gray-700/50">
+                        <td className="py-4 px-4">{doc.name}</td>
+                        <td className="py-4 px-4">{new Date(doc.created_at).toLocaleDateString()}</td>
+                        <td className="py-4 px-4">
+                          <span className="px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-300">
+                            Pending
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <button 
+                            className="text-blue-400 hover:text-blue-300"
+                            onClick={() => window.open(doc.url, '_blank')}
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
