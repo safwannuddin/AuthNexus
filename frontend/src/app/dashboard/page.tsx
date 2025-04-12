@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { loadSampleDocuments, fetchDocuments, DocumentItem } from '@/lib/documents';
+import { 
+  loadSampleDocuments, 
+  fetchDocuments, 
+  checkVerificationStatus,
+  DocumentItem,
+  DocumentVerification 
+} from '@/lib/documents';
 import { listAllFiles } from '@/lib/storage-test';
 import Header from '../../../components/dashboard/Header';
 import Sidebar from '../../../components/dashboard/Sidebar';
@@ -13,11 +19,30 @@ export default function DashboardPage() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [recentUploads, setRecentUploads] = useState<DocumentItem[]>([]);
+  const [verificationStatuses, setVerificationStatuses] = useState<Record<string, DocumentVerification>>({});
 
   // Update the useEffect to also refresh documents after upload
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      for (const doc of recentUploads) {
+        try {
+          const status = await checkVerificationStatus(doc.id);
+          setVerificationStatuses(prev => ({
+            ...prev,
+            [doc.id]: status
+          }));
+        } catch (error) {
+          console.error('Error checking status:', error);
+        }
+      }
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [recentUploads]);
 
   const loadInitialData = async () => {
     try {
