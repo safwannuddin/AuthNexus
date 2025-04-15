@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from '@/lib/supabase'
 import type { VerificationMethod, VerificationRecord } from '@/types'
 
 export async function createVerificationRecord(
