@@ -187,9 +187,18 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         })
       });
 
+      if (!verificationResponse.ok) {
+        const errorData = await verificationResponse.json();
+        throw new Error(errorData.detail || 'Verification failed');
+      }
+
       console.log('📥 Received response from API:', verificationResponse.status);
       const result = await verificationResponse.json();
       console.log('API Response:', result);
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Verification failed');
+      }
       
       // Update document status in database
       console.log('📝 Updating document status...');
