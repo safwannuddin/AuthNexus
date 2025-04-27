@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AuthNexus Document Verification Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        select, input[type="file"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            border: 1px solid #d0e9c6;
+        }
+        .error {
+            background-color: #f2dede;
+            border: 1px solid #ebcccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Document Verification Dashboard</h1>
+    <div class="container">
+        <form id="documentForm">
+            <div class="form-group">
+                <label for="documentType">Document Type:</label>
+                <select id="documentType" required>
+                    <option value="id_card">ID Card</option>
+                    <option value="passport">Passport</option>
+                    <option value="drivers_license">Driver's License</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="userId">User ID:</label>
+                <input type="text" id="userId" required placeholder="Enter user ID">
+            </div>
+            <div class="form-group">
+                <label for="document">Upload Document:</label>
+                <input type="file" id="document" required accept="image/*,.pdf">
+            </div>
+            <button type="submit">Verify Document</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('documentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const file = document.getElementById('document').files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function() {
+                const base64Data = reader.result.split(',')[1];
+                
+                const data = {
+                    document_type: document.getElementById('documentType').value,
+                    document_data: base64Data,
+                    user_id: document.getElementById('userId').value
+                };
+
+                try {
+                    const response = await fetch('http://localhost:8000/api/verify-document', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = `
+                        <h3>Verification Result:</h3>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                    resultDiv.className = response.ok ? 'success' : 'error';
+                } catch (error) {
+                    document.getElementById('result').innerHTML = `Error: ${error.message}`;
+                    document.getElementById('result').className = 'error';
+                }
+            };
+
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html> 

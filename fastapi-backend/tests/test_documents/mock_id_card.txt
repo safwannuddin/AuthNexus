@@ -1,0 +1,5 @@
+This is a mock ID card document for testing purposes.
+Name: John Doe
+ID Number: 123456789
+Date of Birth: 01/01/2000
+Expiry Date: 01/01/2030 

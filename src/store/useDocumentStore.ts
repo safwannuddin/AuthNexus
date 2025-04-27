@@ -9,6 +9,7 @@ interface DocumentState {
   error: string | null;
   fetchDocuments: () => Promise<void>;
   uploadNewDocument: (file: File, type: DocumentType) => Promise<boolean>;
+  verifyDocument: (documentId: string) => Promise<boolean>;
 }
 
 export const useDocumentStore = create<DocumentState>((set, get) => ({
@@ -61,6 +62,9 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
 
       if (error) throw error;
       
+      // Start verification process
+      await get().verifyDocument(document.id);
+      
       set(state => ({
         documents: [document, ...state.documents],
         isLoading: false
@@ -73,6 +77,77 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         isLoading: false 
       });
       console.error('Error uploading document:', error);
+      return false;
+    }
+  },
+
+  verifyDocument: async (documentId: string) => {
+    try {
+      const document = get().documents.find(d => d.id === documentId);
+      if (!document) throw new Error('Document not found');
+
+      // Convert file to base64
+      const response = await fetch(document.file_url);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      const base64Data = await new Promise<string>((resolve) => {
+        reader.onloadend = () => {
+          const result = reader.result;
+          if (typeof result === 'string') {
+            resolve(result.split(',')[1]);
+          } else {
+            throw new Error('Failed to convert file to base64');
+          }
+        };
+        reader.readAsDataURL(blob);
+      });
+
+      // Call verification API
+      const verificationResponse = await fetch('http://localhost:8000/api/verify-document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          document_type: document.type,
+          document_data: base64Data,
+          user_id: document.user_id
+        })
+      });
+
+      const result = await verificationResponse.json();
+      
+      // Update document status in database
+      const { error } = await supabase
+        .from('documents')
+        .update({
+          status: result.verification_result.is_valid ? 
+            VerificationStatus.VERIFIED : 
+            VerificationStatus.FAILED,
+          verification_result: result.verification_result,
+          verified_at: new Date().toISOString()
+        })
+        .eq('id', documentId);
+
+      if (error) throw error;
+
+      // Update local state
+      set(state => ({
+        documents: state.documents.map(d => 
+          d.id === documentId ? {
+            ...d,
+            status: result.verification_result.is_valid ? 
+              VerificationStatus.VERIFIED : 
+              VerificationStatus.FAILED,
+            verification_result: result.verification_result,
+            verified_at: new Date().toISOString()
+          } : d
+        )
+      }));
+
+      return true;
+    } catch (error) {
+      console.error('Error verifying document:', error);
       return false;
     }
   }

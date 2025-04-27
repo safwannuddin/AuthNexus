@@ -5,6 +5,13 @@ export interface User {
   walletAddress: string;
 }
 
+export interface VerificationResult {
+  is_valid: boolean;
+  document_type: string;
+  user_id: string;
+  verification_date: string;
+}
+
 export interface Document {
   id: string;
   user_id: string;
@@ -17,13 +24,14 @@ export interface Document {
   file_url: string;
   file_path: string;
   tx_hash?: string;
+  verification_result?: VerificationResult;
 }
 
 export enum DocumentType {
-  ID = 'Government ID',
-  CERTIFICATE = 'Certificate',
-  LICENSE = 'License',
-  CUSTOM = 'Custom'
+  ID = 'id_card',
+  CERTIFICATE = 'certificate',
+  LICENSE = 'drivers_license',
+  CUSTOM = 'custom'
 }
 
 export enum VerificationStatus {
