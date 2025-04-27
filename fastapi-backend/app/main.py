@@ -5,6 +5,11 @@ from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from pydantic import BaseModel
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -40,8 +45,12 @@ async def root():
 @app.post("/api/verify-document")
 async def verify_document(request: DocumentVerificationRequest):
     try:
+        logger.info(f"Received verification request for document type: {request.document_type}")
+        logger.info(f"User ID: {request.user_id}")
+        logger.info(f"Document data length: {len(request.document_data)} bytes")
+
         # For testing, we'll just return a mock response
-        return {
+        response = {
             "status": "success",
             "message": "Document verified successfully",
             "verification_result": {
@@ -51,7 +60,11 @@ async def verify_document(request: DocumentVerificationRequest):
                 "verification_date": "2024-03-20"
             }
         }
+
+        logger.info(f"Sending response: {response}")
+        return response
     except Exception as e:
+        logger.error(f"Error processing verification request: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

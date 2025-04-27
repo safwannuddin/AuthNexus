@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle, Clock, ExternalLink, FileText } from 'lucide-react';
-import { Document, VerificationStatus } from '../../types';
+import { AlertTriangle, CheckCircle, Clock, FileText, Loader2 } from 'lucide-react';
+import { Document, VerificationStatus, VerificationStep } from '../../types';
 import { useDocumentStore } from '../../store/useDocumentStore';
 import Card from '../ui/Card';
 
@@ -27,11 +27,26 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getStepIcon = (step: VerificationStep) => {
+  switch (step) {
+    case VerificationStep.COMPLETED:
+      return <CheckCircle size={16} className="text-success-500" />;
+    case VerificationStep.PROCESSING:
+    case VerificationStep.SENDING_API:
+    case VerificationStep.SAVING_DB:
+    case VerificationStep.UPLOADING:
+      return <Loader2 size={16} className="text-primary-500 animate-spin" />;
+  }
+};
+
 export default function DocumentList() {
   const { documents, fetchDocuments, isLoading } = useDocumentStore();
 
   useEffect(() => {
     fetchDocuments();
+    // Refresh documents every 5 seconds to show progress
+    const interval = setInterval(fetchDocuments, 5000);
+    return () => clearInterval(interval);
   }, [fetchDocuments]);
 
   if (isLoading) {
@@ -60,9 +75,9 @@ export default function DocumentList() {
 }
 
 function DocumentCard({ document, index }: { document: Document; index: number }) {
-  const { id, name, type, status, confidenceScore, uploadedAt, txHash } = document;
+  const { name, type, status, current_step, confidence_score, uploaded_at, error_message } = document;
   
-  const uploadDate = new Date(uploadedAt).toLocaleDateString('en-US', {
+  const uploadDate = new Date(uploaded_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -80,7 +95,7 @@ function DocumentCard({ document, index }: { document: Document; index: number }
         <div className="flex flex-col md:flex-row md:items-center justify-between p-6">
           <div className="flex items-start gap-4 mb-4 md:mb-0">
             <div className="p-3 rounded-lg bg-white/5">
-              <DocumentIcon name={name} />
+              <DocumentIcon />
             </div>
             
             <div>
@@ -102,47 +117,31 @@ function DocumentCard({ document, index }: { document: Document; index: number }
               <span className="text-sm font-medium">{status}</span>
             </div>
             
-            {confidenceScore !== undefined && (
-              <div className="text-white/60 text-sm">
-                Confidence: {(confidenceScore * 100).toFixed(1)}%
+            {current_step && (
+              <div className="flex items-center gap-2 text-sm text-white/60">
+                {getStepIcon(current_step)}
+                <span>{current_step}</span>
+              </div>
+            )}
+            
+            {error_message && (
+              <div className="text-sm text-error-500 mt-2">
+                Error: {error_message}
+              </div>
+            )}
+            
+            {confidence_score && (
+              <div className="text-sm text-white/60">
+                Confidence Score: {confidence_score}%
               </div>
             )}
           </div>
         </div>
-        
-        {status === VerificationStatus.VERIFIED && txHash && (
-          <div className="px-6 py-3 bg-white/5 border-t border-white/10">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Blockchain Transaction:</span>
-                <code className="bg-white/10 px-2 py-1 rounded text-xs">{txHash.substring(0, 10)}...{txHash.substring(txHash.length - 6)}</code>
-              </div>
-              
-              <a 
-                href={`https://explorer.sui.io/txblock/${txHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-primary-500 hover:text-primary-400 text-sm"
-              >
-                <span>View on Explorer</span>
-                <ExternalLink size={14} />
-              </a>
-            </div>
-          </div>
-        )}
       </Card>
     </motion.div>
   );
 }
 
-function DocumentIcon({ name }: { name: string }) {
-  const extension = name.split('.').pop()?.toLowerCase();
-  
-  if (extension === 'pdf') {
-    return <FileText size={24} className="text-error-500" />;
-  } else if (['jpg', 'jpeg', 'png', 'gif'].includes(extension || '')) {
-    return <FileText size={24} className="text-primary-500" />;
-  } else {
-    return <FileText size={24} className="text-white" />;
-  }
+function DocumentIcon() {
+  return <FileText size={24} className="text-white/60" />;
 }

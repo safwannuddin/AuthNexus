@@ -12,12 +12,21 @@ export interface VerificationResult {
   verification_date: string;
 }
 
+export enum VerificationStep {
+  UPLOADING = 'Uploading to Storage',
+  SAVING_DB = 'Saving to Database',
+  SENDING_API = 'Sending to Verification API',
+  PROCESSING = 'Processing Document',
+  COMPLETED = 'Verification Complete'
+}
+
 export interface Document {
   id: string;
   user_id: string;
   name: string;
   type: DocumentType;
   status: VerificationStatus;
+  current_step: VerificationStep;
   confidence_score?: number;
   uploaded_at: string;
   verified_at?: string;
@@ -25,6 +34,7 @@ export interface Document {
   file_path: string;
   tx_hash?: string;
   verification_result?: VerificationResult;
+  error_message?: string;
 }
 
 export enum DocumentType {
