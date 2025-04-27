@@ -1,0 +1,14 @@
+fastapi==0.115.12
+uvicorn==0.34.2
+python-dotenv==1.1.0
+supabase==2.15.0
+web3==7.10.0
+pydantic==2.11.3
+pytesseract==0.3.10
+Pillow==10.2.0
+opencv-python==4.9.0.80
+numpy==1.26.4
+transformers==4.38.2
+torch==2.2.1
+deepface==0.0.79
+tensorflow==2.15.0 

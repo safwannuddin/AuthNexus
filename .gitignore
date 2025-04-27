@@ -33,3 +33,17 @@ dist-ssr
 # Build
 /build
 node_modules
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Environment variables
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
