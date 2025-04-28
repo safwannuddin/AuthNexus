@@ -1,28 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../utils/supabase';
+import { checkAndConfigureStorage } from '../../utils/supabase';
 
 const SupabaseConnectionTest = () => {
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'success' | 'error'>('checking');
   const [bucketExists, setBucketExists] = useState<boolean | null>(null);
+  const [bucketPublic, setBucketPublic] = useState<boolean | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function checkConnection() {
       try {
-        // Test basic connection
-        const { data, error } = await supabase.from('documents').select('count()', { count: 'exact', head: true });
+        // Test basic connection with a simple query
+        const { error } = await supabase
+          .from('documents')
+          .select('id')
+          .limit(1);
         
         if (error) throw error;
         
         setConnectionStatus('success');
         
-        // Check if documents bucket exists
-        const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+        // Check and configure storage
+        const storageConfigured = await checkAndConfigureStorage();
         
-        if (bucketsError) throw bucketsError;
-        
-        const documentsBucket = buckets.find(bucket => bucket.name === 'documents');
-        setBucketExists(!!documentsBucket);
+        if (storageConfigured) {
+          // Check if documents bucket exists
+          const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+          
+          if (bucketsError) throw bucketsError;
+          
+          const documentsBucket = buckets.find(bucket => bucket.name === 'documents');
+          setBucketExists(!!documentsBucket);
+          
+          if (documentsBucket) {
+            setBucketPublic(documentsBucket.public);
+          }
+        } else {
+          setBucketExists(false);
+          setBucketPublic(false);
+        }
       } catch (error) {
         console.error('Supabase connection test failed:', error);
         setConnectionStatus('error');
@@ -55,7 +72,12 @@ const SupabaseConnectionTest = () => {
         <p className="font-semibold">Documents Bucket Status:</p>
         {bucketExists === null && <p>Checking bucket...</p>}
         {bucketExists === true && (
-          <p className="text-green-600">✓ 'documents' bucket exists</p>
+          <div>
+            <p className="text-green-600">✓ 'documents' bucket exists</p>
+            <p className="text-sm">
+              Public access: {bucketPublic ? '✓ Enabled' : '✗ Disabled'}
+            </p>
+          </div>
         )}
         {bucketExists === false && (
           <p className="text-red-600">✗ 'documents' bucket not found</p>

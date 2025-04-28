@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import DocumentUploader from '../../components/dashboard/DocumentUploader';
+import SupabaseConnectionTest from '../../components/test/SupabaseConnectionTest';
 
 export default function UploadPage() {
   return (
@@ -15,6 +16,7 @@ export default function UploadPage() {
         </p>
       </motion.div>
       
+      <SupabaseConnectionTest />
       <DocumentUploader />
     </div>
   );

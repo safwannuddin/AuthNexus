@@ -139,10 +139,18 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         )
       }));
 
-      // Convert file to base64
-      console.log('🔄 Converting file to base64...');
-      const response = await fetch(document.file_url);
-      const blob = await response.blob();
+      // Download file directly from Supabase storage
+      console.log('🔄 Downloading file from Supabase storage...');
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from('documents')
+        .download(document.file_path);
+
+      if (downloadError) {
+        console.error('Error downloading file:', downloadError);
+        throw new Error(`Failed to download file: ${downloadError.message}`);
+      }
+
+      // Convert blob to base64
       const reader = new FileReader();
       const base64Data = await new Promise<string>((resolve) => {
         reader.onloadend = () => {
@@ -153,7 +161,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
             throw new Error('Failed to convert file to base64');
           }
         };
-        reader.readAsDataURL(blob);
+        reader.readAsDataURL(fileData);
       });
       console.log('✅ File converted to base64');
 

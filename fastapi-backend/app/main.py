@@ -80,8 +80,8 @@ async def verify_document(request: Request) -> Dict[str, Any]:
             )
         
         # Select the appropriate verification service based on document type
-        if document_type == "certificate":
-            verification_service = certificate_verifier
+        if document_type in ["certificate", "custom", "drivers_license", "passport", "id_card"]:
+            verification_service = certificate_verifier  # Using certificate verifier for all types for now
         else:
             raise HTTPException(
                 status_code=400,
