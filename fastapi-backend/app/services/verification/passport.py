@@ -35,9 +35,12 @@ class PassportVerificationService(BaseVerificationService):
                 "validation_checks": {
                     "has_passport_number": bool(self._find_passport_number(text)),
                     "has_name": bool(self._find_name(text)),
+                    "has_nationality": bool(self._find_nationality(text)),
                     "has_date_of_birth": bool(self._find_date_of_birth(text)),
+                    "has_place_of_birth": bool(self._find_place_of_birth(text)),
+                    "has_issue_date": bool(self._find_issue_date(text)),
                     "has_expiry_date": bool(self._find_expiry_date(text)),
-                    "has_nationality": bool(self._find_nationality(text))
+                    "has_authority": bool(self._find_authority(text))
                 }
             }
             
@@ -58,9 +61,12 @@ class PassportVerificationService(BaseVerificationService):
         checks = [
             self._find_passport_number(text),
             self._find_name(text),
+            self._find_nationality(text),
             self._find_date_of_birth(text),
+            self._find_place_of_birth(text),
+            self._find_issue_date(text),
             self._find_expiry_date(text),
-            self._find_nationality(text)
+            self._find_authority(text)
         ]
         return all(checks)
     
@@ -70,14 +76,20 @@ class PassportVerificationService(BaseVerificationService):
         """
         score = 0.0
         if self._find_passport_number(text):
-            score += 0.3
+            score += 0.2
         if self._find_name(text):
-            score += 0.2
-        if self._find_date_of_birth(text):
-            score += 0.2
-        if self._find_expiry_date(text):
-            score += 0.2
+            score += 0.15
         if self._find_nationality(text):
+            score += 0.1
+        if self._find_date_of_birth(text):
+            score += 0.15
+        if self._find_place_of_birth(text):
+            score += 0.1
+        if self._find_issue_date(text):
+            score += 0.1
+        if self._find_expiry_date(text):
+            score += 0.1
+        if self._find_authority(text):
             score += 0.1
         return score
     
@@ -87,7 +99,7 @@ class PassportVerificationService(BaseVerificationService):
         """
         # Passport numbers typically follow a specific format
         # This is a simplified check - in production, use more sophisticated validation
-        passport_pattern = r'[A-Z]{1,2}\d{7,9}'
+        passport_pattern = r'[A-Z]{1,2}[0-9]{6,9}'
         return bool(re.search(passport_pattern, text))
     
     def _find_name(self, text: str) -> bool:
@@ -95,29 +107,53 @@ class PassportVerificationService(BaseVerificationService):
         Look for name patterns
         """
         # Look for common passport name indicators
-        name_indicators = ["surname", "given names", "name", "holder"]
+        name_indicators = ["name", "surname", "given name", "holder"]
         return any(indicator in text.lower() for indicator in name_indicators)
-    
-    def _find_date_of_birth(self, text: str) -> bool:
-        """
-        Look for date of birth patterns
-        """
-        # Look for common date of birth indicators
-        dob_indicators = ["date of birth", "birth date", "dob"]
-        return any(indicator in text.lower() for indicator in dob_indicators)
-    
-    def _find_expiry_date(self, text: str) -> bool:
-        """
-        Look for expiry date patterns
-        """
-        # Look for common expiry date indicators
-        expiry_indicators = ["expiry", "expires", "valid until", "date of expiry"]
-        return any(indicator in text.lower() for indicator in expiry_indicators)
     
     def _find_nationality(self, text: str) -> bool:
         """
         Look for nationality patterns
         """
         # Look for common nationality indicators
-        nationality_indicators = ["nationality", "citizen of", "place of birth"]
-        return any(indicator in text.lower() for indicator in nationality_indicators) 
+        nationality_indicators = ["nationality", "citizen of", "nationality"]
+        return any(indicator in text.lower() for indicator in nationality_indicators)
+    
+    def _find_date_of_birth(self, text: str) -> bool:
+        """
+        Look for date of birth patterns
+        """
+        # Look for common date of birth indicators
+        dob_indicators = ["date of birth", "birth date", "dob", "born"]
+        return any(indicator in text.lower() for indicator in dob_indicators)
+    
+    def _find_place_of_birth(self, text: str) -> bool:
+        """
+        Look for place of birth patterns
+        """
+        # Look for common place of birth indicators
+        pob_indicators = ["place of birth", "born in", "birth place"]
+        return any(indicator in text.lower() for indicator in pob_indicators)
+    
+    def _find_issue_date(self, text: str) -> bool:
+        """
+        Look for issue date patterns
+        """
+        # Look for common issue date indicators
+        issue_indicators = ["date of issue", "issued", "issue date", "valid from"]
+        return any(indicator in text.lower() for indicator in issue_indicators)
+    
+    def _find_expiry_date(self, text: str) -> bool:
+        """
+        Look for expiry date patterns
+        """
+        # Look for common expiry date indicators
+        expiry_indicators = ["date of expiry", "expires", "valid until", "expiration"]
+        return any(indicator in text.lower() for indicator in expiry_indicators)
+    
+    def _find_authority(self, text: str) -> bool:
+        """
+        Look for issuing authority patterns
+        """
+        # Look for common authority indicators
+        authority_indicators = ["authority", "issuing", "issued by", "issuing authority"]
+        return any(indicator in text.lower() for indicator in authority_indicators) 
