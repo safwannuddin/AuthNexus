@@ -3,12 +3,27 @@ import { useDropzone } from 'react-dropzone';
 import { motion } from 'framer-motion';
 import { DocumentType } from '../../types';
 import { useDocumentStore } from '../../store/useDocumentStore';
-import { FileText, Upload, CheckCircle, Loader2 } from 'lucide-react';
+import { FileText, Upload, CheckCircle, BookOpen, CreditCard } from 'lucide-react';
 import Button from '../ui/Button';
+
+const documentTypeInfo = {
+  [DocumentType.PASSPORT]: {
+    icon: BookOpen,
+    description: 'Upload your passport for verification'
+  },
+  [DocumentType.NATIONAL_ID]: {
+    icon: CreditCard,
+    description: 'Upload your national ID card for verification'
+  },
+  [DocumentType.CUSTOM]: {
+    icon: FileText,
+    description: 'Upload a custom document for verification'
+  }
+};
 
 export default function DocumentUploader() {
   const [file, setFile] = useState<File | null>(null);
-  const [documentType, setDocumentType] = useState<DocumentType>(DocumentType.ID);
+  const [documentType, setDocumentType] = useState<DocumentType>(DocumentType.PASSPORT);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const { uploadNewDocument, isLoading } = useDocumentStore();
 
@@ -114,35 +129,35 @@ export default function DocumentUploader() {
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                {Object.values(DocumentType).map((type) => (
-                  <motion.div
-                    key={type}
-                    whileTap={{ scale: 0.98 }}
-                    className={`
-                      border rounded-lg p-4 cursor-pointer transition-colors
-                      ${documentType === type 
-                        ? 'border-primary-500 bg-primary-500/10' 
-                        : 'border-white/20 hover:border-white/40'}
-                    `}
-                    onClick={() => setDocumentType(type as DocumentType)}
-                  >
-                    <div className="flex items-center">
-                      <div className={`
-                        w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center
-                        ${documentType === type ? 'border-primary-500' : 'border-white/40'}
-                      `}>
-                        {documentType === type && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-3 h-3 rounded-full bg-primary-500"
-                          />
-                        )}
+                {Object.entries(documentTypeInfo).map(([type, info]) => {
+                  const Icon = info.icon;
+                  return (
+                    <motion.div
+                      key={type}
+                      whileTap={{ scale: 0.98 }}
+                      className={`
+                        border rounded-lg p-4 cursor-pointer transition-colors
+                        ${documentType === type 
+                          ? 'border-primary-500 bg-primary-500/10' 
+                          : 'border-white/20 hover:border-white/40'}
+                      `}
+                      onClick={() => setDocumentType(type as DocumentType)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`
+                          w-10 h-10 rounded-lg border-2 flex items-center justify-center
+                          ${documentType === type ? 'border-primary-500' : 'border-white/40'}
+                        `}>
+                          <Icon size={20} className={documentType === type ? 'text-primary-500' : 'text-white/40'} />
+                        </div>
+                        <div>
+                          <div className="font-medium">{type.replace('_', ' ').toUpperCase()}</div>
+                          <div className="text-sm text-white/60">{info.description}</div>
+                        </div>
                       </div>
-                      <span>{type}</span>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
 

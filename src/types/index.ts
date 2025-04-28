@@ -38,9 +38,8 @@ export interface Document {
 }
 
 export enum DocumentType {
-  ID = 'id_card',
-  CERTIFICATE = 'certificate',
-  LICENSE = 'drivers_license',
+  PASSPORT = 'passport',
+  NATIONAL_ID = 'national_id',
   CUSTOM = 'custom'
 }
 
