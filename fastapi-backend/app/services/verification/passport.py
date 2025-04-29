@@ -6,6 +6,9 @@ import logging
 from datetime import datetime
 import re
 
+# Configure Tesseract path
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
 logger = logging.getLogger(__name__)
 
 class PassportVerificationService(BaseVerificationService):

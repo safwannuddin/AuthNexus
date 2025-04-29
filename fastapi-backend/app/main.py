@@ -7,6 +7,11 @@ from pydantic import BaseModel
 import os
 import logging
 from app.services.verification.certificate import CertificateVerificationService
+from app.services.verification.passport import PassportVerificationService
+from app.services.verification.id_card import IDCardVerificationService
+from app.services.verification.drivers_license import DriversLicenseVerificationService
+from app.services.verification.national_id import NationalIDVerificationService
+from app.services.verification.custom import CustomVerificationService
 from typing import Dict, Any
 import json
 import base64
@@ -20,6 +25,11 @@ load_dotenv()
 
 # Initialize verification services
 certificate_verifier = CertificateVerificationService()
+passport_verifier = PassportVerificationService()
+id_card_verifier = IDCardVerificationService()
+drivers_license_verifier = DriversLicenseVerificationService()
+national_id_verifier = NationalIDVerificationService()
+custom_verifier = CustomVerificationService()
 
 # Define request model
 class DocumentVerificationRequest(BaseModel):
@@ -80,8 +90,18 @@ async def verify_document(request: Request) -> Dict[str, Any]:
             )
         
         # Select the appropriate verification service based on document type
-        if document_type in ["certificate", "custom", "drivers_license", "passport", "id_card"]:
-            verification_service = certificate_verifier  # Using certificate verifier for all types for now
+        if document_type == "certificate" or document_type == "diploma" or document_type == "degree":
+            verification_service = certificate_verifier
+        elif document_type == "passport":
+            verification_service = passport_verifier
+        elif document_type == "id_card":
+            verification_service = id_card_verifier
+        elif document_type == "drivers_license":
+            verification_service = drivers_license_verifier
+        elif document_type == "national_id":
+            verification_service = national_id_verifier
+        elif document_type == "custom":
+            verification_service = custom_verifier
         else:
             raise HTTPException(
                 status_code=400,

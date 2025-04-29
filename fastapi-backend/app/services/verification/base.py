@@ -4,12 +4,14 @@ import base64
 import io
 from PIL import Image
 import logging
+from ..image_enhancement import ImageEnhancer
 
 logger = logging.getLogger(__name__)
 
 class BaseVerificationService(ABC):
     def __init__(self):
         self.supported_types = []
+        self.image_enhancer = ImageEnhancer()
 
     @abstractmethod
     async def verify(self, document_data: str, document_type: str, user_id: str) -> Dict[str, Any]:
@@ -35,7 +37,11 @@ class BaseVerificationService(ABC):
             
             # Convert to PIL Image
             image = Image.open(io.BytesIO(image_data))
-            return image
+            
+            # Enhance image quality
+            enhanced_image = self.image_enhancer.enhance_for_ocr(image)
+            
+            return enhanced_image
         except Exception as e:
             logger.error(f"Error decoding image: {str(e)}")
             raise ValueError("Invalid image data")
